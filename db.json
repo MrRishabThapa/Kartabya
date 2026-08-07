@@ -1,0 +1,60 @@
+{
+  "book": {
+    "title": "Introduction to Web Development",
+    "subject": "Computer Science",
+    "pages": [
+      {
+        "page_number": 1,
+        "type": "text",
+        "content": "Web development is the process of creating websites and web applications that run in a browser. Every website you visit—from search engines and social media platforms to online stores—is built using web technologies. Modern web development combines design, programming, databases, and networking concepts to deliver interactive experiences to users."
+      },
+      {
+        "page_number": 2,
+        "type": "text",
+        "content": "The web works through a client-server model. The client is usually a web browser such as Chrome or Firefox, while the server is a computer that stores website files and responds to requests. When you enter a URL, the browser sends a request to a server, which then returns the required resources such as HTML, CSS, JavaScript, images, and videos."
+      },
+      {
+        "page_number": 3,
+        "type": "image",
+        "image_url": "https://picsum.photos/900/600?random=1",
+        "caption": "A simplified illustration of how browsers communicate with web servers."
+      },
+      {
+        "page_number": 4,
+        "type": "text",
+        "content": "HTML (HyperText Markup Language) forms the structure of a webpage. It defines headings, paragraphs, buttons, forms, images, and other elements. Think of HTML as the skeleton of a building—it provides the framework on which everything else is constructed."
+      },
+      {
+        "page_number": 5,
+        "type": "text",
+        "content": "CSS (Cascading Style Sheets) controls the appearance of a webpage. It determines colors, spacing, typography, layouts, animations, and responsiveness. If HTML is the skeleton, CSS is the paint, furniture, and interior design that makes a website visually appealing."
+      },
+      {
+        "page_number": 6,
+        "type": "image",
+        "image_url": "https://picsum.photos/900/600?random=2",
+        "caption": "Responsive web design adapts layouts to phones, tablets, and desktops."
+      },
+      {
+        "page_number": 7,
+        "type": "text",
+        "content": "JavaScript brings webpages to life. It allows websites to respond to user actions, update content without reloading, validate forms, create animations, and communicate with APIs. Modern applications such as Google Maps, YouTube, and Instagram rely heavily on JavaScript."
+      },
+      {
+        "page_number": 8,
+        "type": "text",
+        "content": "Frontend development focuses on everything users see and interact with. Popular frontend technologies include React, Next.js, Vue, and Angular. Frontend developers are responsible for creating intuitive interfaces and ensuring a consistent experience across devices."
+      },
+      {
+        "page_number": 9,
+        "type": "text",
+        "content": "Backend development powers the logic behind applications. It handles authentication, databases, business rules, and APIs. Common backend technologies include Node.js, FastAPI, Django, Spring Boot, and Express. Backend systems process requests and deliver data to the frontend."
+      },
+      {
+        "page_number": 10,
+        "type": "text",
+        "content": "Modern web development combines frontend, backend, databases, cloud services, and deployment platforms. Frameworks such as Next.js streamline development, while platforms like Vercel, Netlify, AWS, and Docker simplify deployment. Together, these technologies enable developers to build scalable, secure, and engaging digital experiences."
+      }
+    ]
+  }
+}
