@@ -1,0 +1,9 @@
+import QuizContainer from "@/components/quiz/QuizContainer";
+
+export default function QuizPage() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+      <QuizContainer />
+    </div>
+  );
+}
