@@ -17,10 +17,11 @@ export const GAMES: Game[] = [
     estimatedMinutes: 2,
     xpReward: 50,
     isNew: true,
+    bannerSrc: '/assets/games/daily-quiz.png',
   },
   {
     id: 'concept-coach',
-    title: 'Concept Coach',
+    title: 'Teach Your Companion',
     tagline: 'Teach the AI',
     description:
       'Pick any concept and explain it to an AI tutor. Get graded on accuracy, clarity, and completeness. The best way to master a topic is to teach it.',
@@ -33,21 +34,7 @@ export const GAMES: Game[] = [
     estimatedMinutes: 8,
     xpReward: 100,
     isNew: true,
-  },
-  {
-    id: 'flash-recall',
-    title: 'Flash Recall',
-    tagline: 'Memory challenge',
-    description:
-      'Flashcards flash for a few seconds — formulas, definitions, reactions, theorems. Recall as many as you can before time runs out.',
-    iconName: 'zap',
-    gradient: 'from-yellow-400 via-amber-500 to-orange-500',
-    graphic: '⚡',
-    stat: { label: 'plays', value: '5.2k' },
-    status: 'coming-soon',
-    difficulty: 'medium',
-    estimatedMinutes: 5,
-    xpReward: 50,
+    bannerSrc: '/assets/games/teach-your-companion.png.png',
   },
   {
     id: 'flashcard-duel',
@@ -64,5 +51,6 @@ export const GAMES: Game[] = [
     estimatedMinutes: 5,
     xpReward: 80,
     isNew: true,
+    bannerSrc: '/assets/games/duel.png',
   },
 ];
