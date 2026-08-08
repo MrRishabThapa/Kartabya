@@ -1,5 +1,6 @@
 "use client";
-import MarkdownContent from './MarkdownContent';
+import LessonVisualRenderer from '@/components/lesson/lesson-visual-renderer';
+import type { LessonVisual } from '@/lib/content-api';
 
 interface Props {
   page: {
@@ -7,6 +8,7 @@ interface Props {
     content?: string;
     image_url?: string;
     caption?: string;
+    visuals?: LessonVisual[];
   };
   pageNumber: number;
   onNext?: () => void;
@@ -48,7 +50,7 @@ export default function BookPage({
           </p>
         )}
 
-        {page.type === "markdown" && <MarkdownContent markdown={page.content ?? ''} />}
+        {page.type === "markdown" && <LessonVisualRenderer markdown={page.content ?? ''} visuals={page.visuals ?? []} />}
 
         {page.type === "image" && (
           <div className="space-y-6">
