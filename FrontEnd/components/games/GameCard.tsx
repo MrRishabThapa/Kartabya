@@ -1,11 +1,12 @@
 'use client';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Game } from '@/data/games-types';
 import ComingSoonModal from './ComingSoonModal';
 import DuelLobby from './DuelLobby';
+import QuizPanel from './QuizPanel';
 
 interface Props {
   game: Game;
@@ -16,11 +17,16 @@ export default function GameCard({ game, index }: Props) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
   const [showDuelLobby, setShowDuelLobby] = useState(false);
+  const [showQuizPanel, setShowQuizPanel] = useState(false);
   const isAvailable = game.status === 'available';
 
   const handleClick = () => {
     if (game.id === 'flashcard-duel') {
       setShowDuelLobby(true);
+      return;
+    }
+    if (game.id === 'daily-quiz') {
+      setShowQuizPanel(true);
       return;
     }
     if (isAvailable && game.route) {
@@ -64,17 +70,26 @@ export default function GameCard({ game, index }: Props) {
 
       </motion.button>
 
-      {/* Coming soon modal */}
+      {/* Coming soon modal for games that are not playable yet */}
       <ComingSoonModal
         game={game}
         isOpen={showModal}
         onClose={() => setShowModal(false)}
       />
-      {game.id === 'flashcard-duel' && showDuelLobby && (
-        <DuelLobby
-          onClose={() => setShowDuelLobby(false)}
-          onStartDuel={(roomCode) => router.push(`/games/duel?room=${encodeURIComponent(roomCode)}`)}
-        />
+      {game.id === 'flashcard-duel' && (
+        <AnimatePresence>
+          {showDuelLobby && (
+            <DuelLobby
+              onClose={() => setShowDuelLobby(false)}
+              onStartDuel={(roomCode) => router.push(`/games/duel?room=${encodeURIComponent(roomCode)}`)}
+            />
+          )}
+        </AnimatePresence>
+      )}
+      {game.id === 'daily-quiz' && (
+        <AnimatePresence>
+          {showQuizPanel && <QuizPanel onClose={() => setShowQuizPanel(false)} />}
+        </AnimatePresence>
       )}
     </>
   );
