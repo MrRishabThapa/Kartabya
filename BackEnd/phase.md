@@ -28,13 +28,20 @@ frontend's `sessionStorage`. Once local authentication creates a session, the
 draft is submitted to the authenticated onboarding endpoint.
 
 The backend stores a preferred name, grade, subject, completion timestamp,
-companion nickname, and selected hobbies. Saving is idempotent: resubmitting
-onboarding updates the profile and replaces the user's hobby links.
+companion nickname, and selected hobbies. The API contract uses `userName`,
+`foxNickname`, `hobbies`, and `targetCourse` (`grade`/`subject`); saving is
+idempotent: resubmitting onboarding updates the profile and replaces the
+user's hobby links.
 
 Onboarding completion is tracked explicitly on the user account through
 `users.is_onboarded`. The flag is set when `POST /api/v1/onboard` succeeds and
 is exposed through `GET /api/v1/auth/me`, so the frontend can route users to
 onboarding without probing the onboarding endpoint for a 404.
+
+Signup and login are resilient to stale onboarding drafts: a draft that fails
+to submit (for example a legacy `pandaNickname` draft after the rename to
+`foxNickname`) never blocks a successful account session, and drafts rejected
+with 422 are discarded so onboarding can start fresh.
 
 ## Local configuration
 
