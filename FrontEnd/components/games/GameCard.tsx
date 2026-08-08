@@ -52,20 +52,21 @@ export default function GameCard({ game, index }: Props) {
         `}
       >
         {/* 16:9 Canva banner slot */}
-        <div className={`relative aspect-video overflow-hidden bg-gradient-to-br ${game.gradient}`}>
+        <div className={`illustration-theme-frame relative aspect-video overflow-hidden bg-gradient-to-br ${game.gradient}`}>
           {game.bannerSrc ? (
             <Image
               src={game.bannerSrc}
               alt={`${game.title} banner`}
               fill
-              className="object-cover"
+              className="illustration-theme-image object-cover"
               sizes="(max-width: 640px) 100vw, 50vw"
             />
           ) : (
             <div className="absolute inset-3 rounded-xl border-2 border-dashed border-white/40 bg-black/10" />
           )}
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-white/10 pointer-events-none" />
+          <div className="illustration-theme-wash pointer-events-none absolute inset-0" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-white/10" />
         </div>
 
       </motion.button>
