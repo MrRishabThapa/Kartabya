@@ -1,6 +1,6 @@
-def main():
-    print("Hello from backend!")
+"""Compatibility entrypoint for ``uvicorn main:server``."""
+
+from app.main import app
 
 
-if __name__ == "__main__":
-    main()
+server = app
