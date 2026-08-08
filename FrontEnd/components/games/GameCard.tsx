@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Game } from '@/data/games-types';
 import ComingSoonModal from './ComingSoonModal';
+import DuelLobby from './DuelLobby';
 
 interface Props {
   game: Game;
@@ -14,9 +15,14 @@ interface Props {
 export default function GameCard({ game, index }: Props) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
+  const [showDuelLobby, setShowDuelLobby] = useState(false);
   const isAvailable = game.status === 'available';
 
   const handleClick = () => {
+    if (game.id === 'flashcard-duel') {
+      setShowDuelLobby(true);
+      return;
+    }
     if (isAvailable && game.route) {
       router.push(game.route);
     } else {
@@ -64,6 +70,12 @@ export default function GameCard({ game, index }: Props) {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
       />
+      {game.id === 'flashcard-duel' && showDuelLobby && (
+        <DuelLobby
+          onClose={() => setShowDuelLobby(false)}
+          onStartDuel={(roomCode) => router.push(`/games/duel?room=${encodeURIComponent(roomCode)}`)}
+        />
+      )}
     </>
   );
 }
