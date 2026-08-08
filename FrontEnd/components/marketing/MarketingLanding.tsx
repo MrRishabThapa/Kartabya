@@ -62,6 +62,12 @@ const faqs = [
   ["How do I cancel?", "You can cancel a Pro plan any time from your account. You will keep access through the end of your billing period."],
 ];
 
+const steps: Array<[string, LucideIcon, string, string]> = [
+  ["01", Target, "Tell us your goals", "A few thoughtful questions help us understand what you want to learn and why it matters."],
+  ["02", BookOpen, "Start your way", "Learn through lessons, voice, notes, and conversations that fit your natural rhythm."],
+  ["03", Rocket, "Grow with your tutor", "Your AI tutor remembers what helps and adapts every next step around your progress."],
+];
+
 function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-2.5" aria-label="Adaptiv home">
