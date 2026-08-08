@@ -12,6 +12,22 @@
   --color-brand-secondary-muted: #CEB7A8;
   --color-brand-accent: #FBBF24;
 }
+
+:root {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --primary: #f27928;
+  --primary-foreground: #ffffff;
+  --surface: #0f172a;
+  --surface-muted: #1a1e2f;
+  --border: #334155;
+}
+
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
 html {
   scroll-behavior: smooth;
 }
