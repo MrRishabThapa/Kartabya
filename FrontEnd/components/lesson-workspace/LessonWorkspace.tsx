@@ -7,6 +7,9 @@ import {
   ArrowLeft,
   Bot,
   Check,
+  LayoutGrid,
+  Mic,
+  MicOff,
   Plus,
   Send,
   StickyNote,
@@ -32,6 +35,17 @@ interface ChatMessage {
   id: string;
   role: 'user' | 'companion';
   text: string;
+}
+
+interface BrowserSpeechRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: { results: ArrayLike<{ 0: { transcript: string } }> }) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
 }
 
 const NOTE_COLORS = ['#FFF4B8', '#DDF7E7', '#DDEBFF', '#FFE1E1'];
@@ -83,7 +97,11 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
   const [draft, setDraft] = useState('');
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState('');
   const dragOrigin = useRef({ x: 0, y: 0 });
+  const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
 
   const saveNotes = (nextNotes: StickyNoteItem[]) => {
     setNotes(nextNotes);
@@ -118,11 +136,62 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
   const changeZoom = (amount: number) => setZoom((value) => Math.min(1.55, Math.max(0.65, value + amount)));
   const resetCanvas = () => { setZoom(1); setPan({ x: 0, y: 0 }); };
 
+  const organizeNotes = () => {
+    saveNotes(notes.map((note, index) => ({
+      ...note,
+      x: 30 + (index % 5) * 180,
+      y: 34 + Math.floor(index / 5) * 112,
+      rotation: 0,
+    })));
+    setSelectedNoteId(null);
+  };
+
+  const toggleVoiceInput = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    const speechWindow = window as Window & {
+      SpeechRecognition?: new () => BrowserSpeechRecognition;
+      webkitSpeechRecognition?: new () => BrowserSpeechRecognition;
+    };
+    const SpeechRecognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setVoiceStatus('Voice input is not supported in this browser.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results).map((result) => result[0].transcript).join(' ');
+      setDraft((current) => `${current}${current ? ' ' : ''}${transcript}`.trim());
+      setVoiceStatus('Voice note captured. You can edit it before adding.');
+    };
+    recognition.onerror = () => {
+      setIsListening(false);
+      setVoiceStatus('Could not hear that. Try speaking again.');
+    };
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    setVoiceStatus('Listening… speak your note.');
+    setIsListening(true);
+    recognition.start();
+  };
+
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
         <div className="flex items-center gap-2"><StickyNote size={17} className="text-brand-primary" /><h2 className="text-sm font-extrabold text-slate-800">My notes</h2></div>
-        <span className="text-[11px] font-semibold text-slate-400">Saved automatically</span>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={organizeNotes} disabled={notes.length < 2} className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-brand-primary-tint bg-brand-primary-bg px-2.5 text-[11px] font-extrabold text-brand-primary transition-colors hover:bg-brand-primary-tint disabled:cursor-not-allowed disabled:opacity-40" aria-label="Organize notes into a grid">
+            <LayoutGrid size={14} /> Organize
+          </button>
+          <span className="hidden text-[11px] font-semibold text-slate-400 sm:inline">Saved automatically</span>
+        </div>
       </div>
       <div
         className="relative min-h-0 flex-1 overflow-hidden bg-[#e8edf2] p-3"
@@ -151,14 +220,26 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
             {notes.map((note, index) => (
               <motion.article
                 key={note.id}
+                layout
+                drag
+                dragMomentum={false}
+                dragElastic={0.05}
+                dragConstraints={{ left: 0, right: 802, top: 0, bottom: 604 }}
+                onPointerDown={(event) => { event.stopPropagation(); setSelectedNoteId(note.id); }}
+                onDragStart={() => setSelectedNoteId(note.id)}
+                onDragEnd={(_, info) => {
+                  const currentX = note.x ?? 30 + (index % 5) * 180;
+                  const currentY = note.y ?? 34 + (Math.floor(index / 5) % 6) * 112;
+                  saveNotes(notes.map((item) => item.id === note.id ? { ...item, x: Math.max(0, Math.min(802, currentX + info.offset.x / zoom)), y: Math.max(0, Math.min(604, currentY + info.offset.y / zoom)) } : item));
+                }}
                 initial={{ opacity: 0, scale: 1.25, y: -34, rotate: (note.rotation ?? 0) - 7 }}
                 animate={{ opacity: 1, scale: 1, y: 0, rotate: note.rotation ?? 0 }}
                 exit={{ opacity: 0, scale: 0.82, y: -12, rotate: -7 }}
                 transition={{ type: 'spring', stiffness: 440, damping: 22, mass: 0.7 }}
-                className="absolute h-[116px] w-[158px] overflow-hidden p-3.5 text-slate-700 [clip-path:polygon(0_0,100%_0,100%_86%,86%_100%,0_100%)] [filter:drop-shadow(0_7px_5px_rgba(15,23,42,0.18))]"
+                className={`absolute h-[116px] w-[158px] cursor-grab overflow-hidden p-3.5 text-slate-700 [clip-path:polygon(0_0,100%_0,100%_86%,86%_100%,0_100%)] [filter:drop-shadow(0_7px_5px_rgba(15,23,42,0.18))] active:cursor-grabbing ${selectedNoteId === note.id ? 'z-10 ring-2 ring-brand-primary ring-offset-2' : ''}`}
                 style={{ left: note.x ?? 30 + (index % 5) * 180, top: note.y ?? 34 + (Math.floor(index / 5) % 6) * 112, backgroundColor: note.color, backgroundImage: 'linear-gradient(115deg, rgba(255,255,255,.42), transparent 42%), repeating-linear-gradient(0deg, rgba(120,90,40,.045) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 1px, transparent 1px 5px)' }}
               >
-                <p className="pr-5 text-xs font-bold leading-5">{note.text}</p>
+                <p className="pointer-events-none pr-5 text-xs font-bold leading-5">{note.text}</p>
                 <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => saveNotes(notes.filter((item) => item.id !== note.id))} aria-label="Delete note" className="absolute right-2 top-2 grid h-6 w-6 cursor-pointer place-items-center rounded-md text-slate-500/70 transition-colors hover:bg-white/35 hover:text-red-600"><Trash2 size={13} /></button>
               </motion.article>
             ))}
@@ -168,8 +249,10 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
       </div>
       <div className="shrink-0 border-t border-slate-100 p-3">
         {notes.length >= MAX_NOTES_PER_SESSION && <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700">You’ve reached the {MAX_NOTES_PER_SESSION}-note limit for this lesson session.</p>}
+        {voiceStatus && <p className={`mb-2 text-[10px] font-semibold ${isListening ? 'text-brand-primary' : 'text-slate-400'}`} role="status">{voiceStatus}</p>}
         <div className="flex gap-2">
           <input disabled={notes.length >= MAX_NOTES_PER_SESSION} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') addNote(); }} placeholder={notes.length >= MAX_NOTES_PER_SESSION ? 'Session note limit reached' : 'Write a sticky note...'} aria-label="New sticky note" className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-primary disabled:cursor-not-allowed disabled:opacity-60" />
+          <button disabled={notes.length >= MAX_NOTES_PER_SESSION} type="button" onClick={toggleVoiceInput} aria-label={isListening ? 'Stop voice input' : 'Speak a sticky note'} aria-pressed={isListening} className={`grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-xl transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${isListening ? 'bg-red-500 text-white animate-pulse' : 'bg-brand-primary-bg text-brand-primary hover:bg-brand-primary-tint'}`}>{isListening ? <MicOff size={16} /> : <Mic size={16} />}</button>
           <button disabled={notes.length >= MAX_NOTES_PER_SESSION} type="button" onClick={addNote} aria-label="Add note" className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-xl bg-brand-primary text-white transition-colors hover:bg-brand-primary-dark disabled:cursor-not-allowed disabled:opacity-50"><Plus size={17} /></button>
         </div>
       </div>
