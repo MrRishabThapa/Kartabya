@@ -1,6 +1,7 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -10,6 +11,9 @@ import {
   Send,
   StickyNote,
   Trash2,
+  Minus,
+  RotateCcw,
+  ZoomIn,
 } from 'lucide-react';
 import EBookContainer from '@/components/ebook/EBookContainer';
 import { useUser } from '@/context/UserContext';
@@ -19,6 +23,9 @@ interface StickyNoteItem {
   id: string;
   text: string;
   color: string;
+  x?: number;
+  y?: number;
+  rotation?: number;
 }
 
 interface ChatMessage {
@@ -28,6 +35,26 @@ interface ChatMessage {
 }
 
 const NOTE_COLORS = ['#FFF4B8', '#DDF7E7', '#DDEBFF', '#FFE1E1'];
+const MAX_NOTES_PER_SESSION = 30;
+const PAPER_SLAP_SOUND = 'https://orangefreesounds.com/wp-content/uploads/2015/10/Slap-sound-effect.mp3';
+
+function playPaperFallback() {
+  const AudioContextClass = window.AudioContext;
+  if (!AudioContextClass) return;
+  const context = new AudioContextClass();
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  oscillator.type = 'triangle';
+  oscillator.frequency.setValueAtTime(145, context.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(62, context.currentTime + 0.09);
+  gain.gain.setValueAtTime(0.0001, context.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.18, context.currentTime + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.1);
+  oscillator.connect(gain).connect(context.destination);
+  oscillator.start();
+  oscillator.stop(context.currentTime + 0.11);
+  window.setTimeout(() => void context.close(), 180);
+}
 
 function getStoredNotes(key: string): StickyNoteItem[] {
   if (typeof window === 'undefined') return [];
@@ -54,6 +81,9 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
   const storageKey = `adaptiv-lesson-notes:${lesson.id}`;
   const [notes, setNotes] = useState<StickyNoteItem[]>(() => getStoredNotes(storageKey));
   const [draft, setDraft] = useState('');
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const dragOrigin = useRef({ x: 0, y: 0 });
 
   const saveNotes = (nextNotes: StickyNoteItem[]) => {
     setNotes(nextNotes);
@@ -62,13 +92,31 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
 
   const addNote = () => {
     const text = draft.trim();
-    if (!text) return;
+    if (!text || notes.length >= MAX_NOTES_PER_SESSION) return;
+    const noteIndex = notes.length;
+    const column = noteIndex % 5;
+    const row = Math.floor(noteIndex / 5);
     saveNotes([
       ...notes,
-      { id: `${lesson.id}-${Date.now()}`, text, color: NOTE_COLORS[notes.length % NOTE_COLORS.length] },
+      {
+        id: `${lesson.id}-${Date.now()}`,
+        text,
+        color: NOTE_COLORS[noteIndex % NOTE_COLORS.length],
+        x: 30 + column * 180,
+        y: 34 + row * 112,
+        rotation: [-2, 1.5, -1, 2.5][noteIndex % 4],
+      },
     ]);
     setDraft('');
+
+    // Freesound paper-smack style effect; browsers may block remote audio, so failure is silent.
+    const slap = new Audio(PAPER_SLAP_SOUND);
+    slap.volume = 0.34;
+    void slap.play().catch(() => playPaperFallback());
   };
+
+  const changeZoom = (amount: number) => setZoom((value) => Math.min(1.55, Math.max(0.65, value + amount)));
+  const resetCanvas = () => { setZoom(1); setPan({ x: 0, y: 0 }); };
 
   return (
     <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -76,18 +124,54 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
         <div className="flex items-center gap-2"><StickyNote size={17} className="text-brand-primary" /><h2 className="text-sm font-extrabold text-slate-800">My notes</h2></div>
         <span className="text-[11px] font-semibold text-slate-400">Saved automatically</span>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto p-4 scrollbar-hidden">
-        {notes.length === 0 ? (
-          <div className="grid h-full min-h-32 place-items-center rounded-xl border border-dashed border-slate-200 bg-slate-50 p-5 text-center"><div><StickyNote size={24} className="mx-auto text-slate-300" /><p className="mt-2 text-xs font-bold text-slate-500">Capture an idea from the ebook</p><p className="mt-1 text-[11px] text-slate-400">Your notes will be available from your dashboard later.</p></div></div>
-        ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {notes.map((note) => <article key={note.id} className="relative min-h-24 rounded-xl p-3 shadow-sm" style={{ backgroundColor: note.color }}><p className="pr-5 text-xs font-semibold leading-5 text-slate-700">{note.text}</p><button type="button" onClick={() => saveNotes(notes.filter((item) => item.id !== note.id))} aria-label="Delete note" className="absolute right-2 top-2 cursor-pointer text-slate-500/70 transition-colors hover:text-red-600"><Trash2 size={13} /></button></article>)}
-          </div>
-        )}
+      <div
+        className="relative min-h-0 flex-1 overflow-hidden bg-[#e8edf2] p-3"
+        onWheel={(event) => { event.preventDefault(); changeZoom(event.deltaY > 0 ? -0.08 : 0.08); }}
+      >
+        <div className="pointer-events-none absolute left-5 top-4 z-20 rounded-full bg-white/80 px-2.5 py-1 text-[10px] font-bold text-slate-500 shadow-sm backdrop-blur-sm">
+          Drag canvas · scroll to zoom
+        </div>
+        <div className="absolute right-4 top-3 z-20 flex items-center gap-1 rounded-xl border border-slate-200 bg-white/90 p-1 shadow-sm backdrop-blur-sm">
+          <button type="button" onClick={() => changeZoom(-0.1)} aria-label="Zoom out" className="grid h-7 w-7 place-items-center rounded-lg text-slate-500 hover:bg-slate-100"><Minus size={14} /></button>
+          <span className="w-10 text-center text-[10px] font-bold text-slate-500">{Math.round(zoom * 100)}%</span>
+          <button type="button" onClick={() => changeZoom(0.1)} aria-label="Zoom in" className="grid h-7 w-7 place-items-center rounded-lg text-slate-500 hover:bg-slate-100"><ZoomIn size={14} /></button>
+          <button type="button" onClick={resetCanvas} aria-label="Reset canvas view" className="grid h-7 w-7 place-items-center rounded-lg text-slate-500 hover:bg-slate-100"><RotateCcw size={13} /></button>
+        </div>
+        <motion.div
+          drag
+          dragMomentum={false}
+          dragElastic={0.08}
+          onDragStart={() => { dragOrigin.current = pan; }}
+          onDrag={(_, info) => setPan({ x: dragOrigin.current.x + info.offset.x, y: dragOrigin.current.y + info.offset.y })}
+          className="absolute left-1/2 top-1/2 h-[720px] w-[960px] cursor-grab touch-none active:cursor-grabbing"
+          style={{ x: pan.x, y: pan.y, scale: zoom, marginLeft: -480, marginTop: -360 }}
+        >
+          <div className="absolute inset-0 rounded-xl border border-slate-300/70 bg-[#dfe5e9] shadow-inner" />
+          <AnimatePresence initial={false}>
+            {notes.map((note, index) => (
+              <motion.article
+                key={note.id}
+                initial={{ opacity: 0, scale: 1.25, y: -34, rotate: (note.rotation ?? 0) - 7 }}
+                animate={{ opacity: 1, scale: 1, y: 0, rotate: note.rotation ?? 0 }}
+                exit={{ opacity: 0, scale: 0.82, y: -12, rotate: -7 }}
+                transition={{ type: 'spring', stiffness: 440, damping: 22, mass: 0.7 }}
+                className="absolute h-[116px] w-[158px] overflow-hidden p-3.5 text-slate-700 [clip-path:polygon(0_0,100%_0,100%_86%,86%_100%,0_100%)] [filter:drop-shadow(0_7px_5px_rgba(15,23,42,0.18))]"
+                style={{ left: note.x ?? 30 + (index % 5) * 180, top: note.y ?? 34 + (Math.floor(index / 5) % 6) * 112, backgroundColor: note.color, backgroundImage: 'linear-gradient(115deg, rgba(255,255,255,.42), transparent 42%), repeating-linear-gradient(0deg, rgba(120,90,40,.045) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 1px, transparent 1px 5px)' }}
+              >
+                <p className="pr-5 text-xs font-bold leading-5">{note.text}</p>
+                <button type="button" onPointerDown={(event) => event.stopPropagation()} onClick={() => saveNotes(notes.filter((item) => item.id !== note.id))} aria-label="Delete note" className="absolute right-2 top-2 grid h-6 w-6 cursor-pointer place-items-center rounded-md text-slate-500/70 transition-colors hover:bg-white/35 hover:text-red-600"><Trash2 size={13} /></button>
+              </motion.article>
+            ))}
+          </AnimatePresence>
+          {notes.length === 0 && <div className="absolute inset-0 grid place-items-center text-center"><div className="rounded-2xl bg-white/65 px-6 py-5 shadow-sm backdrop-blur-sm"><StickyNote size={24} className="mx-auto text-brand-primary/60" /><p className="mt-2 text-xs font-extrabold text-slate-600">Your canvas is ready</p><p className="mt-1 text-[11px] text-slate-400">Add a note and slap it onto the board.</p></div></div>}
+        </motion.div>
       </div>
-      <div className="flex shrink-0 gap-2 border-t border-slate-100 p-3">
-        <input value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') addNote(); }} placeholder="Write a sticky note..." aria-label="New sticky note" className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-primary" />
-        <button type="button" onClick={addNote} aria-label="Add note" className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-xl bg-brand-primary text-white transition-colors hover:bg-brand-primary-dark"><Plus size={17} /></button>
+      <div className="shrink-0 border-t border-slate-100 p-3">
+        {notes.length >= MAX_NOTES_PER_SESSION && <p className="mb-2 rounded-lg bg-amber-50 px-3 py-2 text-[11px] font-bold text-amber-700">You’ve reached the {MAX_NOTES_PER_SESSION}-note limit for this lesson session.</p>}
+        <div className="flex gap-2">
+          <input disabled={notes.length >= MAX_NOTES_PER_SESSION} value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') addNote(); }} placeholder={notes.length >= MAX_NOTES_PER_SESSION ? 'Session note limit reached' : 'Write a sticky note...'} aria-label="New sticky note" className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700 outline-none transition-colors placeholder:text-slate-400 focus:border-brand-primary disabled:cursor-not-allowed disabled:opacity-60" />
+          <button disabled={notes.length >= MAX_NOTES_PER_SESSION} type="button" onClick={addNote} aria-label="Add note" className="grid h-10 w-10 shrink-0 cursor-pointer place-items-center rounded-xl bg-brand-primary text-white transition-colors hover:bg-brand-primary-dark disabled:cursor-not-allowed disabled:opacity-50"><Plus size={17} /></button>
+        </div>
       </div>
     </section>
   );
