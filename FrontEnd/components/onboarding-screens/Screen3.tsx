@@ -25,10 +25,10 @@ export default function Screen3({
       <input
         autoFocus
         type="text"
-        placeholder="Panda nickname..."
-        value={data.pandaNickname}
-        onChange={(e) => updateData({ pandaNickname: e.target.value })}
-        className="w-full text-5xl font-bold text-[#7C3AED] placeholder:text-purple-200 bg-transparent outline-none"
+        placeholder="Fox nickname..."
+        value={data.foxNickname}
+        onChange={(e) => updateData({ foxNickname: e.target.value })}
+        className="w-full text-5xl font-bold text-brand-primary placeholder:text-brand-primary-tint bg-transparent outline-none"
       />
 
       <div className="flex justify-between pt-8">
@@ -38,7 +38,7 @@ export default function Screen3({
           </button>
         )}
 
-        <Button disabled={!data.pandaNickname} onClick={onNext}>
+        <Button disabled={!data.foxNickname} onClick={onNext}>
           Perfect!
         </Button>
       </div>

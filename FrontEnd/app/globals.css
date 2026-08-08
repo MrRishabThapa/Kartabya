@@ -1,4 +1,17 @@
 @import "tailwindcss";
+
+@theme {
+  --color-brand-primary: #F27928;
+  --color-brand-primary-light: #FF8D48;
+  --color-brand-primary-dark: #C26120;
+  --color-brand-primary-darker: #9D4F1A;
+  --color-brand-primary-bg: #FEF2EA;
+  --color-brand-primary-tint: #FBE0CC;
+  --color-brand-secondary: #EAD0BF;
+  --color-brand-secondary-light: #EEDBD0;
+  --color-brand-secondary-muted: #CEB7A8;
+  --color-brand-accent: #FBBF24;
+}
 html {
   scroll-behavior: smooth;
 }
@@ -29,8 +42,8 @@ html {
   animation: shimmer 1.6s infinite;
 }
 ::selection {
-  background: rgba(124, 58, 237, 0.18);
-  color: #7C3AED;
+  background: rgba(242, 121, 40, 0.18);
+  color: #F27928;
 }
 
 .clip-path-page-corner {
@@ -42,7 +55,7 @@ html {
 }
 
 .landing-page :focus-visible {
-  outline: 3px solid #8b5cf6;
+  outline: 3px solid #FF8D48;
   outline-offset: 3px;
 }
 
@@ -63,13 +76,13 @@ html {
   z-index: -1;
   inset: 0.06em -0.03em 0.11em;
   border-radius: 999px;
-  background: #7c3aed;
+  background: #F27928;
   content: "";
   transform: rotate(-2.5deg);
 }
 
 .landing-artwork-slot {
-  background-image: linear-gradient(135deg, rgba(124, 58, 237, 0.04), rgba(255, 255, 255, 0.08));
+  background-image: linear-gradient(135deg, rgba(242, 121, 40, 0.04), rgba(255, 255, 255, 0.08));
 }
 
 .landing-page a,

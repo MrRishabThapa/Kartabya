@@ -27,7 +27,7 @@ export default function QuizOption({
       ? "border-red-500 bg-red-50 text-red-600"
       : "border-slate-200 text-slate-500"
     : selected
-    ? "border-[#7C3AED] bg-purple-50 text-[#7C3AED]"
+    ? "border-brand-primary-light bg-brand-primary-bg text-brand-primary"
     : "border-slate-200 text-slate-700 hover:border-slate-300";
 
   return (

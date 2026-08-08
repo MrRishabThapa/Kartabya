@@ -206,7 +206,7 @@ export default function CityMap() {
       <div className="absolute top-4 md:top-6 left-4 md:left-6 z-40 pointer-events-none max-w-[70%]">
         <div className="inline-block bg-white/85 backdrop-blur-md border border-slate-200 p-3 md:p-5 rounded-xl shadow-lg">
           <h1 className="text-lg md:text-2xl lg:text-3xl font-extrabold text-slate-800 tracking-tight">
-            Computer Science City
+                  Adaptiv Learning Map
           </h1>
           <p className="text-[11px] md:text-sm text-slate-500 mt-0.5 font-medium">
             Class 12 · NEB · {isMobile ? 'Drag to explore' : 'Hover & click a district'}

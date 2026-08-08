@@ -3,7 +3,7 @@
 import { api } from "@/lib/api";
 import type { OnboardingData } from "@/types/onboarding";
 
-const DRAFT_KEY = "arcademia-onboarding-draft";
+const DRAFT_KEY = "adaptiv-onboarding-draft";
 
 export function saveOnboardingDraft(data: OnboardingData) {
   sessionStorage.setItem(DRAFT_KEY, JSON.stringify(data));

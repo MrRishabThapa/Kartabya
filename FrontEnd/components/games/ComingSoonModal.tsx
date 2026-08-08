@@ -51,10 +51,10 @@ export default function ComingSoonModal({ game, isOpen, onClose }: Props) {
 
             {/*
               🎨 Illustration section
-              Uses undraw illustration with violet theme
+              Uses an illustration with the Adaptiv warm theme
               Place your SVG at: /public/assets/illustrations/coming-soon.svg
             */}
-            <div className="bg-violet-50 pt-10 pb-6 px-6 flex items-center justify-center">
+            <div className="bg-brand-primary-bg pt-10 pb-6 px-6 flex items-center justify-center">
               <div className="relative w-48 h-40">
                 <Image
                   src="/assets/illustrations/coming-soon.svg"
@@ -70,7 +70,7 @@ export default function ComingSoonModal({ game, isOpen, onClose }: Props) {
             <div className="px-6 md:px-8 pt-6 pb-8 text-center">
               {/* Badge */}
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full
-                              bg-violet-100 text-violet-700 text-xs font-bold">
+                              bg-brand-primary-tint text-brand-primary-dark text-xs font-bold">
                 <Sparkles size={12} strokeWidth={2.5} />
                 Launching Soon
               </div>
@@ -98,7 +98,7 @@ export default function ComingSoonModal({ game, isOpen, onClose }: Props) {
                 </div>
                 <div className="w-px h-8 bg-slate-200" />
                 <div>
-                  <div className="text-lg font-extrabold text-violet-600">
+                  <div className="text-lg font-extrabold text-brand-primary">
                     +{game.xpReward} XP
                   </div>
                   <div className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">

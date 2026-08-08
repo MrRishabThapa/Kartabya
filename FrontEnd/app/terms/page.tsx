@@ -27,9 +27,9 @@ export default function TermsPage() {
     >
       <TLDRCard
         bullets={[
-          "Use Arcademia honestly.",
-          "Keep your Panda and login secure.",
-          "Arcademia owns the Arcade universe.",
+          "Use Adaptiv honestly.",
+          "Keep your Fox and login secure.",
+          "Adaptiv owns the learning experience.",
           "We help you study, but don’t guarantee grades."
         ]}
       />
@@ -37,7 +37,7 @@ export default function TermsPage() {
       <section id="acceptance" className="mb-10">
         <h2 className="text-xl font-semibold mb-4">Acceptance</h2>
         <p className="text-slate-700 leading-7">
-          By using Arcademia, you agree to these terms. If you do not agree,
+          By using Adaptiv, you agree to these terms. If you do not agree,
           please discontinue use of the platform.
         </p>
       </section>
@@ -53,7 +53,7 @@ export default function TermsPage() {
       <section id="security" className="mb-10">
         <h2 className="text-xl font-semibold mb-4">Account Security</h2>
         <p className="text-slate-700 leading-7">
-          You are responsible for protecting your login credentials and Panda
+          You are responsible for protecting your login credentials and Fox
           profile. Do not share passwords.
         </p>
       </section>
@@ -69,7 +69,7 @@ export default function TermsPage() {
       <section id="liability" className="mb-10">
         <h2 className="text-xl font-semibold mb-4">Limitation of Liability</h2>
         <p className="text-slate-700 leading-7">
-          Arcademia is a study companion. We are not responsible for academic
+          Adaptiv is a study companion. We are not responsible for academic
           outcomes, device failures, or third-party service interruptions.
         </p>
       </section>

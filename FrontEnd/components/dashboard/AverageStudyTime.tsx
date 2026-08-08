@@ -103,7 +103,7 @@ export default function AverageStudyTime() {
               animationDuration={600}
             >
               {MOCK_STUDY_TIME.map((entry:any, i:any) => (
-                <Cell key={i} fill={entry.isToday ? '#7C3AED' : '#EDE9FE'} />
+                <Cell key={i} fill={entry.isToday ? '#F27928' : '#FBE0CC'} />
               ))}
             </Bar>
           </BarChart>

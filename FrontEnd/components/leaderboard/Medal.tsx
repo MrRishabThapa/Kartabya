@@ -7,24 +7,24 @@ interface Props {
 
 const MEDAL_COLORS = {
   1: {
-    ribbon: '#7C3AED',       // violet ribbon
-    ribbonDark: '#5B21B6',
+    ribbon: '#F27928',
+    ribbonDark: '#9D4F1A',
     body: '#FBBF24',         // gold
     bodyDark: '#D97706',
     shine: '#FDE68A',
     text: '1',
   },
   2: {
-    ribbon: '#7C3AED',
-    ribbonDark: '#5B21B6',
+    ribbon: '#F27928',
+    ribbonDark: '#9D4F1A',
     body: '#E5E7EB',         // silver
     bodyDark: '#9CA3AF',
     shine: '#F9FAFB',
     text: '2',
   },
   3: {
-    ribbon: '#7C3AED',
-    ribbonDark: '#5B21B6',
+    ribbon: '#F27928',
+    ribbonDark: '#9D4F1A',
     body: '#D97706',         // bronze
     bodyDark: '#92400E',
     shine: '#FBBF24',

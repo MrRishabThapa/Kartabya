@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 interface OnboardingData {
   userName: string;
-  pandaNickname: string;
+  foxNickname: string;
   hobbies: string[];
   targetCourse: {
     grade: string;
@@ -22,7 +22,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export function UserProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<OnboardingData>({
     userName: "",
-    pandaNickname: "",
+    foxNickname: "",
     hobbies: [],
     targetCourse: { grade: "", subject: "" },
   });
@@ -34,7 +34,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const resetData = () => {
     setData({
       userName: "",
-      pandaNickname: "",
+      foxNickname: "",
       hobbies: [],
       targetCourse: { grade: "", subject: "" },
     });

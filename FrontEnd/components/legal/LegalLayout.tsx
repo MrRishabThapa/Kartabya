@@ -29,9 +29,9 @@ export default function LegalLayout({
               <a
                 key={section.id}
                 href={`#${section.id}`}
-                className="flex items-center gap-3 text-sm text-slate-600 hover:text-[#7C3AED] transition-colors"
+                className="flex items-center gap-3 text-sm text-slate-600 hover:text-brand-primary transition-colors"
               >
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-violet-100 text-[#7C3AED] text-xs font-semibold">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-primary-tint text-brand-primary text-xs font-semibold">
                   {index + 1}
                 </div>
                 {section.icon}

@@ -42,7 +42,7 @@ export default function LevelNode({
     : lesson.type === 'boss'
       ? '#EF4444'                                      // red for boss
       : lesson.type === 'checkpoint'
-        ? '#8B5CF6'                                    // violet for checkpoint
+        ? '#FF8D48'                                    // orange for checkpoint
         : lesson.type === 'bonus'
           ? '#F59E0B'                                  // amber for bonus
           : unitColor;                                 // unit color for normal
@@ -52,7 +52,7 @@ export default function LevelNode({
     : lesson.type === 'boss'
       ? '#B91C1C'
       : lesson.type === 'checkpoint'
-        ? '#6D28D9'
+        ? '#C26120'
         : lesson.type === 'bonus'
           ? '#B45309'
           : unitAccentColor;

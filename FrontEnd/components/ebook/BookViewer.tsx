@@ -54,14 +54,14 @@ export default function BookViewer({ book }: any) {
             relative
             bg-white
             border-4
-            border-violet-500
+            border-brand-primary
             rounded-3xl
             p-6
             shadow-[0_25px_80px_rgba(124,58,237,0.18)]
           "
         >
 
-          {/* Purple Spine */}
+          {/* Brand spine */}
           
 
           <HTMLFlipBook
@@ -88,7 +88,7 @@ export default function BookViewer({ book }: any) {
                 className="
                   bg-white
                   border
-                  border-violet-100
+                  border-brand-primary-tint
                   shadow-[0_10px_40px_rgba(124,58,237,0.10)]
                 "
               >

@@ -26,8 +26,8 @@ export default function BookPage({
     >
       {/* Header */}
       <div className="mb-8">
-        <div className="text-xs uppercase tracking-widest font-bold text-[#7C3AED]">
-          Arcademia
+        <div className="text-xs uppercase tracking-widest font-bold text-brand-primary">
+          Adaptiv
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export default function BookPage({
               w-16
               h-16
               bg-gradient-to-tl
-              from-violet-200
+              from-brand-primary-tint
               to-transparent
               clip-path-page-corner
               transition-all
@@ -96,7 +96,7 @@ export default function BookPage({
               absolute
               bottom-5
               right-5
-              text-violet-500
+              text-brand-primary
               text-xs
               font-bold
             "

@@ -27,7 +27,7 @@ export const MOCK_ACTIVITIES: Activity[] = [
     // Dynamically points to the next lesson based on user's progress.
     // For now we hardcode — later, this can be computed from useProgress hook.
     route: '/learn/computer-science/web-technology',
-    accentColor: '#7C3AED',
+    accentColor: '#F27928',
     illustration: '',
     size: 'small',
     meta: {

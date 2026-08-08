@@ -1,7 +1,7 @@
 "use client";
 import { motion, type Variants } from "framer-motion";
 
-export default function ArcadeChat({ text }: { text: string }) {
+export default function AdaptivChat({ text }: { text: string }) {
   const characters = text.split("");
 
   const container: Variants = {

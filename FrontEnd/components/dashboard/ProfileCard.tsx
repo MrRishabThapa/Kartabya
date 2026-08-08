@@ -24,15 +24,15 @@ export default function ProfileCard({ user }: Props) {
                  overflow-hidden"
     >
       {/*
-        🐼 Panda mascot — emerges from bottom-right corner.
+        🦊 Fox mascot — emerges from bottom-right corner.
         Absolutely positioned, bottom-aligned, so the "cut" of the image
         sits flush with the card's bottom edge creating the "peeking out" effect.
       */}
       <div className="absolute bottom-0 left-2 sm:left-4 w-42 h-50 sm:w-50 sm:h-58
                       pointer-events-none">
         <Image
-          src="/assets/enhanced.png"
-          alt="Panda mascot"
+          src="/assets/logo.png"
+          alt="Fox mascot"
           fill
           priority
           className="object-contain object-bottom"
@@ -63,7 +63,7 @@ export default function ProfileCard({ user }: Props) {
         <div className="w-px h-8 bg-slate-100" />
 
         <div className="flex items-center gap-2">
-          <Zap size={16} className="text-violet-600" strokeWidth={2.5} />
+          <Zap size={16} className="text-brand-primary" strokeWidth={2.5} />
           <div>
             <div className="text-sm font-extrabold text-slate-800 leading-none">
               {user.totalXp.toLocaleString()}

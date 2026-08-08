@@ -55,7 +55,7 @@ export default function Screen6({
                 className={`px-6 py-3 rounded-xl border-2 font-semibold transition-all duration-150
                   ${
                     selected
-                      ? "border-[#7C3AED] bg-purple-50 text-[#7C3AED] border-b-4 translate-y-[2px]"
+                      ? "border-brand-primary-light bg-brand-primary-bg text-brand-primary border-b-4 translate-y-[2px]"
                       : "border-slate-200 text-slate-600 hover:border-slate-300"
                   }`}
               >
@@ -92,7 +92,7 @@ export default function Screen6({
                   className={`px-6 py-3 rounded-xl border-2 font-semibold transition-all duration-150
                     ${
                       selected
-                        ? "border-[#7C3AED] bg-purple-50 text-[#7C3AED] border-b-4 translate-y-[2px]"
+                        ? "border-brand-primary-light bg-brand-primary-bg text-brand-primary border-b-4 translate-y-[2px]"
                         : "border-slate-200 text-slate-600 hover:border-slate-300"
                     }`}
                 >

@@ -57,7 +57,7 @@ export default function PrivacyPage() {
       <section id="cookies" className="mb-10">
         <h2 className="text-xl font-semibold mb-4">Cookies</h2>
         <p className="text-slate-700 leading-7">
-          Cookies are used to remember Focus Mode sessions and your Panda name.
+          Cookies are used to remember Focus Mode sessions and your fox name.
         </p>
       </section>
     </LegalLayout>

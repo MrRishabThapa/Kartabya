@@ -15,7 +15,7 @@ export default function YourProgress() {
         <h2 className="text-lg font-extrabold text-slate-800 tracking-tight">
           Your Progress
         </h2>
-        <button className="text-xs font-semibold text-violet-600 hover:text-violet-700">
+        <button className="text-xs font-semibold text-brand-primary hover:text-brand-primary-dark">
           View all
         </button>
       </div>

@@ -1,7 +1,7 @@
 import CityMap from '@/components/city-map/CityMap';
 
 export const metadata = {
-  title: 'Learn · Computer Science City',
+  title: 'Learn · Adaptiv Learning Map',
 };
 
 export default function LearnPage() {

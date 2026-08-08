@@ -24,7 +24,7 @@ export default function ErrorState({
       transition={{ duration: 0.4 }}
       className="min-h-[400px] flex flex-col items-center justify-center text-center px-6"
     >
-      {/* Panda animation */}
+      {/* Fox mascot */}
       <div className="w-48 h-48">
         <LottieLoader url="https://assets2.lottiefiles.com/packages/lf20_yr6zz3wv.json" />
       </div>

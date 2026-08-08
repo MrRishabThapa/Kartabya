@@ -32,9 +32,9 @@ export default function Sidebar() {
       <Link href="/dashboard" className="mb-10">
         <Image
           src="/assets/logo.png"
-          alt="Arcademia"
-          width={40}
-          height={40}
+          alt="Adaptiv fox mascot"
+          width={50}
+          height={50}
           priority
         />
       </Link>
@@ -54,7 +54,7 @@ export default function Sidebar() {
                 flex flex-col items-center gap-1 py-3 px-2 rounded-xl
                 transition-colors
                 ${isActive
-                  ? 'bg-violet-50 text-violet-600'
+                  ? 'bg-brand-primary-bg text-brand-primary'
                   : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50'
                 }
               `}

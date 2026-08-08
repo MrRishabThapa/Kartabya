@@ -240,8 +240,8 @@ export const UNITS: Record<string, Unit> = {
     id: 'oop',
     title: 'Block Plaza',
     courseTitle: 'Object Oriented Programming',
-    color: '#A78BFA',
-    accentColor: '#6D28D9',
+    color: '#FF8D48',
+    accentColor: '#C26120',
     lessons: [
       {
         id: 'oop-classes-objects',

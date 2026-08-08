@@ -228,7 +228,7 @@ Both modes render **the exact same content**, styled responsively via Tailwind b
 
 - **Typography**: `slate-800` for headings, `slate-500` for body text
 - **Card**: Pure white `bg-white`, `border-slate-200`, subtle shadow
-- **Buttons**: Uses `DuolingoButton` from `components/shared/Button.tsx` — always violet primary
+- **Buttons**: Uses `DuolingoButton` from `components/shared/Button.tsx` — always warm orange primary
 - **District colors**: Each district has a unique brand color used in 3 places max — icon, glow, progress bar
 - **Icons**: All from `lucide-react` (no emojis for consistency)
 
@@ -352,4 +352,4 @@ For questions or design decisions, ping the frontend team lead. For content chan
 
 ## 📝 License
 
-Internal use only — Arcademia Education Platform.
+Internal use only — Adaptiv Education Platform.

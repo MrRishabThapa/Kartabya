@@ -54,7 +54,7 @@ export default function LoginPage() {
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold text-slate-800">Welcome back.</h1>
           <p className="text-slate-500">
-            Let’s continue your journey to Arcade.
+            Let’s continue your journey with Adaptiv.
           </p>
         </div>
 
@@ -70,7 +70,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#7C3AED] focus:ring-2 focus:ring-purple-100 outline-none"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-primary-light focus:ring-2 focus:ring-brand-primary-tint outline-none"
             />
           </div>
 
@@ -81,7 +81,7 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-[#7C3AED] focus:ring-2 focus:ring-purple-100 outline-none"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-primary-light focus:ring-2 focus:ring-brand-primary-tint outline-none"
             />
           </div>
 
@@ -99,7 +99,7 @@ export default function LoginPage() {
 
           <button
             type="button"
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 shadow-sm transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700 focus:outline-none focus:ring-2 focus:ring-violet-200 focus:ring-offset-2"
+            className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 shadow-sm transition hover:border-brand-primary-tint hover:bg-brand-primary-bg hover:text-brand-primary-dark focus:outline-none focus:ring-2 focus:ring-brand-primary-tint focus:ring-offset-2"
           >
             <GoogleIcon className="size-5" />
             Continue with Google
@@ -110,7 +110,7 @@ export default function LoginPage() {
           Don’t have an account?{" "}
           <Link
             href="/auth/signup"
-            className="text-[#7C3AED] font-semibold hover:underline"
+            className="text-brand-primary font-semibold hover:underline"
           >
             Create one
           </Link>

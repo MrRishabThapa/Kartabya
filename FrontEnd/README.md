@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🐼 Arcademia
+# 🦊 Adaptiv
 
 ### ✨ Generative AI‑Powered Learning Platform
 
@@ -10,16 +10,16 @@ Transforming lessons into animated, personalized learning experiences.
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue?style=for-the-badge&logo=typescript)
-![Framer Motion](https://img.shields.io/badge/Framer-Motion-purple?style=for-the-badge)
+![Framer Motion](https://img.shields.io/badge/Framer-Motion-orange?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)
 
 </div>
 
 ---
 
-## 🚀 What is Arcademia?
+## 🚀 What is Adaptiv?
 
-Arcademia is a next‑generation EdTech platform where:
+Adaptiv is a next‑generation EdTech platform where:
 
 > Lessons are **structured JSON scene graphs** — not video files.
 
@@ -136,8 +136,8 @@ Clean. Modular. Scalable.
 ## 🚀 Getting Started
 
 ```bash
-git clone https://github.com/your-username/arcademia-web-app.git
-cd arcademia-web-app/frontend
+git clone https://github.com/your-username/adaptiv-web-app.git
+cd adaptiv-web-app/frontend
 npm install
 npm run dev
 Open in browser:
@@ -148,7 +148,7 @@ http://localhost:3000
 🔮 Roadmap
  Schema-driven quiz blocks
  Adaptive difficulty
- Panda animated tutor
+ Fox animated tutor
  Scene streaming engine
  AI-generated assessments
 ```

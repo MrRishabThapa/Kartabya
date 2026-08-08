@@ -1,6 +1,6 @@
 export interface OnboardingData {
   userName: string;
-  pandaNickname: string;
+  foxNickname: string;
   hobbies: string[];
   targetCourse: {
     grade: string;

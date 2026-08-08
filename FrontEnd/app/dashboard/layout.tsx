@@ -8,8 +8,8 @@ import TopBar from '@/components/dashboard/TopBar';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s · Arcademia',
-    default: 'Dashboard · Arcademia',
+    template: '%s · Adaptiv',
+    default: 'Dashboard · Adaptiv',
   },
 };
 

@@ -21,7 +21,7 @@ export default function QuizProgress({ current, total }: Props) {
 
       <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
         <motion.div
-          className="h-full bg-[#7C3AED]"
+          className="h-full bg-brand-primary"
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.4 }}

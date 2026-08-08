@@ -14,18 +14,18 @@ interface Props {
  */
 function getRowGradient(rank: number, isCurrentUser: boolean) {
   if (isCurrentUser) {
-    return 'from-violet-100 to-violet-50 border-violet-300';
+    return 'from-brand-primary-tint/70 to-brand-primary-bg border-brand-primary-light';
   }
 
   // Gradient shifts from soft yellow → orange → coral as rank descends
   const gradients = [
-    'from-amber-50 to-orange-50',       // rank 4
-    'from-orange-50 to-orange-100',     // rank 5
-    'from-orange-100 to-orange-200',    // rank 6
-    'from-orange-200 to-red-100',       // rank 7
-    'from-red-100 to-rose-100',         // rank 8
-    'from-rose-100 to-pink-100',        // rank 9
-    'from-pink-100 to-pink-200',        // rank 10+
+    'from-slate-50 to-orange-50',       // rank 4
+    'from-slate-50 to-orange-50',       // rank 5
+    'from-slate-50 to-orange-50',       // rank 6
+    'from-slate-50 to-orange-50',       // rank 7
+    'from-slate-50 to-orange-50',       // rank 8
+    'from-slate-50 to-orange-50',       // rank 9
+    'from-slate-50 to-orange-50',       // rank 10+
   ];
 
   const index = Math.min(rank - 4, gradients.length - 1);
@@ -49,10 +49,10 @@ export default function LeaderboardRow({ entry, index }: Props) {
       transition={{ duration: 0.3, delay: index * 0.04 }}
       className={`
         relative flex items-center gap-3 md:gap-4
-        px-3 md:px-4 py-2.5 md:py-3
+        px-3 md:px-4 py-3 md:py-3.5
         rounded-2xl border
         bg-gradient-to-r ${gradientClass}
-        hover:shadow-md transition-shadow cursor-pointer
+        hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 cursor-pointer
       `}
     >
       {/* Avatar */}
@@ -76,14 +76,13 @@ export default function LeaderboardRow({ entry, index }: Props) {
 
       {/* Rank + Name */}
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] md:text-xs font-bold text-slate-600">
+        <p className="text-[11px] md:text-xs font-bold text-slate-500">
           {RANK_LABEL(entry.rank)} Place
         </p>
         <p className="text-sm md:text-base font-extrabold text-slate-800 truncate">
           {entry.name}
           {entry.isCurrentUser && (
-            <span className="ml-2 text-[10px] font-bold text-violet-600 uppercase
-                             tracking-wider">
+            <span className="ml-2 rounded-full bg-white/80 px-2 py-0.5 text-[10px] font-bold text-brand-primary uppercase tracking-wider">
               You
             </span>
           )}

@@ -23,11 +23,11 @@ export default function GamesHeader({ totalGames }: Props) {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <h1 className="text-xl md:text-2xl font-extrabold text-slate-800 tracking-tight">
-              Games Arcade
+              Adaptiv Challenges
             </h1>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md
                              text-[10px] font-bold uppercase tracking-wider
-                             bg-violet-100 text-violet-700">
+                             bg-brand-primary-tint text-brand-primary-dark">
               <Sparkles size={10} strokeWidth={2.5} />
               Launching Soon
             </span>
@@ -39,4 +39,4 @@ export default function GamesHeader({ totalGames }: Props) {
       </div>
     </motion.div>
   );
-} 
+}

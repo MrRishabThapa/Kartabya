@@ -3,8 +3,8 @@ import "./globals.css";
 import { UserProvider } from "@/context/UserContext";
 
 export const metadata: Metadata = {
-  title: "Arcademia | Start your learning journey",
-  description: "Set up your personalized Arcademia learning journey.",
+  title: { template: '%s · Adaptiv', default: 'Adaptiv — Adaptive Learning for Curious Minds' },
+  description: 'Adaptiv personalizes every lesson to how you learn best. AI-powered, interactive, and built for real mastery.',
 };
 
 export default function RootLayout({

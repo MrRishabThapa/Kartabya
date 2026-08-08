@@ -123,24 +123,20 @@ function PodiumSpot({ entry, delay }: { entry: LeaderboardEntry; delay: number }
         {entry.name}
       </p>
 
-      {/* Score */}
-      <p
-        className="mt-1 text-sm md:text-base font-bold tabular-nums"
-        style={{ color: t.scoreColor }}
-      >
-        {entry.score.toLocaleString()} {entry.scoreUnit}
-      </p>
-       <p
-        className="mt-1 text-sm md:text-base font-bold tabular-nums"
-        style={{ color: t.scoreColor }}
-      >
-      {entry.isCurrentUser && (
-            <span className="ml-2 text-[10px] font-bold text-white-600 uppercase
-                             tracking-wider border border-white/20 p-2 rounded-xl">
-              You
-            </span>
-          )}
-      </p>
+      {/* Score and current-user marker */}
+      <div className="mt-1 flex items-center justify-center gap-2">
+        <p
+          className="text-sm md:text-base font-bold tabular-nums"
+          style={{ color: t.scoreColor }}
+        >
+          {entry.score.toLocaleString()} {entry.scoreUnit}
+        </p>
+        {entry.isCurrentUser && (
+          <span className="rounded-full border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+            You
+          </span>
+        )}
+      </div>
     </motion.div>
   );
 }

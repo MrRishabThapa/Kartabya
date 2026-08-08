@@ -25,7 +25,7 @@ export const GAMES: Game[] = [
     description:
       'Pick any concept and explain it to an AI tutor. Get graded on accuracy, clarity, and completeness. The best way to master a topic is to teach it.',
     iconName: 'brain-circuit',
-    gradient: 'from-violet-500 via-purple-600 to-indigo-700',
+    gradient: 'from-brand-primary via-brand-primary-dark to-brand-primary-darker',
     graphic: '🧠',
     stat: { label: 'players', value: '8k' },
     status: 'coming-soon',

@@ -7,7 +7,7 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export default function DuolingoButton({ children, variant = 'primary', className, ...props }: Props) {
   const variants = {
-    primary: "bg-[#7C3AED] border-violet-800 text-white hover:bg-[#8B5CF6]",
+    primary: "bg-brand-primary border-brand-primary-dark text-white hover:bg-brand-primary-light",
     secondary: "bg-white border-slate-200 text-slate-600 hover:bg-slate-50",
     ghost: "bg-transparent border-transparent text-slate-400 hover:bg-slate-50"
   };

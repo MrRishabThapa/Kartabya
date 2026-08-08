@@ -94,7 +94,7 @@ export default function OnboardingPage() {
       {/* Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-2 bg-slate-100">
         <motion.div 
-          className="h-full bg-[#7C3AED]"
+          className="h-full bg-brand-primary"
           initial={{ width: "0%" }}
           animate={{ width: `${(step / 6) * 100}%` }}
         />

@@ -16,7 +16,7 @@ export default function GamesPage() {
       {/* 🎮 All games in one clean grid */}
       <section>
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-1 h-5 rounded-full bg-violet-500" />
+          <div className="w-1 h-5 rounded-full bg-brand-primary" />
           <h2 className="text-lg font-extrabold text-slate-800 tracking-tight">
             Featured Games
           </h2>

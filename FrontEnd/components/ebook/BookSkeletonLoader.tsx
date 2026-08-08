@@ -65,7 +65,7 @@ export default function BookSkeleton() {
             "
           >
 
-            {/* Arcademia Header */}
+            {/* Adaptiv Header */}
             <div className="h-4 w-28 rounded shimmer mb-10 mt-5" />
 
             {/* Paragraphs */}

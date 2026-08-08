@@ -67,7 +67,7 @@ export const DISTRICTS: District[] = [
     name: 'Block Plaza',
     courseTitle: 'Object Oriented Programming',
     description: 'Build with reusable blocks. Classes, inheritance, polymorphism and encapsulation.',
-    color: '#A78BFA',
+    color: '#FF8D48',
     glowColor: 'rgba(167, 139, 250, 0.6)',
     polygonPoints: '55,42 85,42 85,65 55,65',
     centerCoords: { x: 70, y: 53 },

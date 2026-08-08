@@ -40,7 +40,7 @@ export default function Screen4({
               className={`relative p-4 rounded-xl border-2 font-semibold transition-all
                 ${
                   selected
-                    ? "border-[#7C3AED] bg-purple-50 text-[#7C3AED] border-b-4"
+                    ? "border-brand-primary-light bg-brand-primary-bg text-brand-primary border-b-4"
                     : "border-slate-200 text-slate-600"
                 }`}
             >

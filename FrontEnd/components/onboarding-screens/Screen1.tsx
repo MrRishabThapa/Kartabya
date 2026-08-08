@@ -16,7 +16,7 @@ export default function Screen1({
       </div>
 
       <div className="max-w-2xl">
-        <Chat text="Legend tells of Arcade—a state of infinite wisdom where focus is as steady as the stars. I’m just a wanderer here... but I think we can reach it if we walk together." />
+        <Chat text="Adaptiv meets you where you are, then helps you build understanding one thoughtful step at a time. I’m here to learn how you think and shape the path with you." />
       </div>
 
       <Button onClick={onNext} className="px-12">

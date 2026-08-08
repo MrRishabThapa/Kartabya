@@ -25,12 +25,12 @@ export default function QuizResult({ score, total, onRestart }: Props) {
 
       <div className="text-xl text-slate-600">
         You scored{" "}
-        <span className="font-bold text-[#7C3AED]">
+        <span className="font-bold text-brand-primary">
           {score} / {total}
         </span>
       </div>
 
-      <div className="text-4xl font-bold text-[#7C3AED]">
+      <div className="text-4xl font-bold text-brand-primary">
         {percentage}%
       </div>
 
