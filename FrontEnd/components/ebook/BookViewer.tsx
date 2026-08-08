@@ -7,7 +7,7 @@ import Button from "@/components/shared/Button";
 
 const HTMLFlipBook = HTMLFlipBookRaw as any;
 
-export default function BookViewer({ book }: any) {
+export default function BookViewer({ book, embedded = false }: any) {
   const bookRef = useRef<any>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -24,17 +24,17 @@ export default function BookViewer({ book }: any) {
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-slate-50 px-4 py-4">
+    <div className={`${embedded ? 'h-full min-h-0 px-2 py-2' : 'h-screen px-4 py-4'} flex flex-col overflow-hidden bg-slate-50`}>
 
       {/* Header */}
       <div className="text-center shrink-0">
-        <h1 className="text-3xl font-bold text-slate-900">
+        <h1 className={`${embedded ? 'text-base' : 'text-3xl'} font-bold text-slate-900`}>
           {book.title}
         </h1>
       </div>
 
       {/* Toolbar */}
-      <div className="flex justify-between items-center mt-4 mb-4 shrink-0">
+      <div className="mt-2 mb-2 flex shrink-0 items-center justify-between">
 
         <div className="text-sm text-slate-500">
           Page {currentPage} of {totalPages}
@@ -66,8 +66,8 @@ export default function BookViewer({ book }: any) {
 
           <HTMLFlipBook
             ref={bookRef}
-            width={520}
-            height={620}
+            width={embedded ? 315 : 520}
+            height={embedded ? 385 : 620}
             size="fixed"
             drawShadow={true}
             flippingTime={800}
@@ -105,7 +105,7 @@ export default function BookViewer({ book }: any) {
       </div>
 
       {/* Controls */}
-      <div className="flex justify-between gap-4 mt-4 shrink-0">
+      <div className="mt-2 flex shrink-0 justify-between gap-2">
 
         <Button onClick={prevPage}>
           Previous Page
