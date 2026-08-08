@@ -1,7 +1,13 @@
 "use client";
+import ReactMarkdown from 'react-markdown';
 
 interface Props {
-  page: any;
+  page: {
+    type: 'text' | 'markdown' | 'image';
+    content?: string;
+    image_url?: string;
+    caption?: string;
+  };
   pageNumber: number;
   onNext?: () => void;
 }
@@ -36,14 +42,16 @@ export default function BookPage({
 
         {page.type === "text" && (
           <p className="text-lg leading-9 text-slate-700">
-            {page.content}
+            {page.content ?? ''}
           </p>
         )}
+
+        {page.type === "markdown" && <div className="markdown-lesson-content"><ReactMarkdown>{page.content ?? ''}</ReactMarkdown></div>}
 
         {page.type === "image" && (
           <div className="space-y-6">
             <img
-              src={page.image_url}
+              src={page.image_url ?? ''}
               alt=""
               className="
                 w-full
@@ -54,7 +62,7 @@ export default function BookPage({
             />
 
             <p className="text-sm text-slate-500 italic">
-              {page.caption}
+              {page.caption ?? ''}
             </p>
           </div>
         )}
