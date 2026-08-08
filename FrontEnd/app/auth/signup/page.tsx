@@ -8,7 +8,11 @@ import Button from "@/components/shared/Button";
 import GoogleIcon from "@/components/shared/GoogleIcon";
 import { signup, login } from "@/lib/auth-service";
 import { ApiError } from "@/lib/api";
-import { completeOnboardingDraft, hasOnboardingDraft } from "@/lib/onboarding-draft";
+import {
+  completeOnboardingDraft,
+  hasOnboardingDraft,
+} from "@/lib/onboarding-draft";
+import { googleAuthUrl } from "@/lib/google-auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -65,14 +69,14 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center px-6">
-      <div className="w-full max-w-md space-y-8">
+    <div className="min-h-screen bg-[#FEF2EA] flex items-center justify-center px-6 py-10">
+      <div className="w-full max-w-lg space-y-8 px-6 py-8 sm:px-10">
         <div className="w-40 h-40 mx-auto">
           <LottieLoader url="https://assets9.lottiefiles.com/packages/lf20_kkflmtur.json" />
         </div>
 
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold text-slate-800">
+          <h1 className="text-4xl font-bold text-[#243247]">
             Begin your journey.
           </h1>
           <p className="text-slate-500">Create your Adaptiv account.</p>
@@ -94,26 +98,27 @@ export default function SignupPage() {
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm text-slate-500">Password</label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-primary-light focus:ring-2 focus:ring-brand-primary-tint outline-none"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm text-slate-500">Confirm Password</label>
-            <input
-              type="password"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-primary-light focus:ring-2 focus:ring-brand-primary-tint outline-none"
-            />
+          <div className="space-y-2 flex gap-4 ">
+            <div>
+              <label className="text-sm text-slate-500">Password</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-primary-light focus:ring-2 focus:ring-brand-primary-tint outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-slate-500">Confirm Password</label>
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-primary-light focus:ring-2 focus:ring-brand-primary-tint outline-none"
+              />
+            </div>
           </div>
 
           <Button type="submit" className="w-full">
@@ -128,13 +133,13 @@ export default function SignupPage() {
             <span className="h-px flex-1 bg-slate-200" />
           </div>
 
-          <button
-            type="button"
-            className="flex w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 shadow-sm transition hover:border-brand-primary-tint hover:bg-brand-primary-bg hover:text-brand-primary-dark focus:outline-none focus:ring-2 focus:ring-brand-primary-tint focus:ring-offset-2"
+          <a
+            href={googleAuthUrl}
+            className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border-2 border-[#FBE0CC] bg-white px-4 py-3 font-semibold text-[#C26120] shadow-sm transition hover:border-[#FF8D48] hover:bg-[#FEF2EA] focus:outline-none focus:ring-2 focus:ring-[#FBBF24] focus:ring-offset-2"
           >
             <GoogleIcon className="size-5" />
             Continue with Google
-          </button>
+          </a>
         </form>
 
         <p className="text-center text-sm text-slate-500">
