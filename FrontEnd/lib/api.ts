@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL!;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export class ApiError extends Error {
   status: number;
@@ -10,6 +10,26 @@ export class ApiError extends Error {
     this.body = body;
   }
 }
+
+export type ApiUser = {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar_url: string | null;
+  email_verified: boolean;
+  is_onboarded: boolean;
+};
+
+export type ApiOnboarding = {
+  userName: string;
+  foxNickname: string;
+  hobbies: string[];
+  targetCourse: {
+    grade: string;
+    subject: string;
+  };
+  completedAt: string;
+};
 
 async function request(path: string, options: RequestInit = {}, retry = true) {
   const res = await fetch(`${API_URL}${path}`, {
