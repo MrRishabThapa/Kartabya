@@ -54,15 +54,16 @@ export default function ComingSoonModal({ game, isOpen, onClose }: Props) {
               Uses an illustration with the Adaptiv warm theme
               Place your SVG at: /public/assets/illustrations/coming-soon.svg
             */}
-            <div className="bg-brand-primary-bg pt-10 pb-6 px-6 flex items-center justify-center">
-              <div className="relative w-48 h-40">
+            <div className="illustration-theme-frame flex items-center justify-center px-6 pb-6 pt-10">
+              <div className="relative h-40 w-48 overflow-hidden rounded-2xl">
                 <Image
                   src="/assets/illustrations/coming-soon.svg"
                   alt="Coming soon illustration"
                   fill
-                  className="object-contain"
+                  className="illustration-theme-image object-contain"
                   priority
                 />
+                <div className="illustration-theme-wash pointer-events-none absolute inset-0" />
               </div>
             </div>
 
@@ -123,7 +124,7 @@ export default function ComingSoonModal({ game, isOpen, onClose }: Props) {
               </div>
 
               <p className="mt-3 text-[11px] text-slate-400">
-                We'll email you the moment {game.title} goes live.
+                We&apos;ll email you the moment {game.title} goes live.
               </p>
             </div>
           </motion.div>
