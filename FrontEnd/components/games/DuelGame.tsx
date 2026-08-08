@@ -22,6 +22,7 @@ import {
   useRef,
   useState,
 } from 'react';
+import { awardXp } from '@/lib/xp';
 
 const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false });
 
@@ -125,6 +126,10 @@ export default function DuelGame({
   const [consoleOpen, setConsoleOpen] = useState(false);
   const [code, setCode] = useState(initialCode);
   const [consoleOutput, setConsoleOutput] = useState('Run your code to see test results here.');
+
+  useEffect(() => {
+    if (winner === true) awardXp(80);
+  }, [winner]);
 
   const endGame = useCallback((didWin: boolean) => {
     setGameStatus('OVER');
