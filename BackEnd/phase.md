@@ -50,3 +50,51 @@ AUTH_SESSION_TTL_SECONDS=604800
 - Add email verification, password reset, rate limiting, and account lockout
   protections before production use.
 - Use versioned database migrations before production deployment.
+
+# Phase 3 — Personalized Quiz Generation
+
+## Implemented
+
+- OpenAI-powered quiz generation (`gpt-4o-mini`, configurable) around the
+  chapter or topic the student is reading.
+- Quizzes personalized with the hobbies collected during onboarding; the LLM
+  weaves the hobbies into question scenarios and matches grade level.
+- Synchronous generation: `POST /v1/quiz` returns the full quiz when ready.
+- Persistence of quizzes, questions, and options, with grade/subject/hobbies
+  snapshotted at generation time.
+- Attempt grading and history: `POST /v1/quiz/{id}/attempt` persists
+  per-question answers and the score.
+- Strict LLM output validation with one retry on malformed responses.
+- All quiz endpoints behind the authenticated session cookie.
+
+## Quiz flow
+
+1. `POST /v1/quiz` with `content` (the chapter/topic) generates and persists
+   a quiz; `subject`, grade, and hobbies come from the user's profile unless
+   provided in the request.
+2. The response matches the frontend `BackendQuiz` contract (`type`,
+   `number_of_qns`, `questions` with lettered options and explanations).
+3. `GET /v1/quiz` lists the user's quizzes and `GET /v1/quiz/{id}` returns
+   one with all questions.
+4. The frontend submits the selected answers to
+   `POST /v1/quiz/{id}/attempt`; the backend grades them and stores the
+   attempt and answers.
+
+## Data model
+
+- `quizzes` — one per generation, with `topic`, `subject`, `grade`, and a
+  JSON snapshot of `hobbies`.
+- `quiz_questions` — ordered questions with the correct answer letter.
+- `quiz_options` — the four options per question with explanations.
+- `quiz_attempts` — one row per graded attempt (`score`, `total`).
+- `quiz_answers` — the option selected for each question in an attempt.
+
+## Local configuration
+
+```env
+OPEN_AI_KEY=sk-...
+OPENAI_MODEL=gpt-4o-mini
+```
+
+Keep the OpenAI key in `.env` out of version control; generation fails with a
+clear error when it is missing.
