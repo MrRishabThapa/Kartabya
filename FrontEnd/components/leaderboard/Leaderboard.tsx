@@ -1,10 +1,11 @@
 'use client';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Flame, Sparkles, Target, Trophy, Users, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { LeaderboardData } from '@/data/leaderboard-types';
 import { computeRankings } from '@/lib/leaderboard-utils';
+import { getEarnedXp } from '@/lib/xp';
 import LeaderboardPodium from './LeaderboardPodium';
 import LeaderboardRow from './LeaderboardRow';
 
@@ -16,10 +17,16 @@ export default function Leaderboard({ data }: Props) {
   const router = useRouter();
 
   // 🎯 Compute ranks dynamically from scores
-  const rankedEntries = useMemo(
-    () => computeRankings(data.entries),
-    [data.entries]
-  );
+  const [earnedXp, setEarnedXp] = useState(0);
+
+  useEffect(() => {
+    const sync = () => setEarnedXp(getEarnedXp());
+    sync();
+    window.addEventListener('adaptiv:xp-updated', sync);
+    return () => window.removeEventListener('adaptiv:xp-updated', sync);
+  }, []);
+
+  const rankedEntries = useMemo(() => computeRankings(data.entries.map((entry) => entry.isCurrentUser ? { ...entry, score: entry.score + earnedXp } : entry)), [data.entries, earnedXp]);
 
   const podiumEntries = rankedEntries.filter((e) => e.rank <= 3);
   const listEntries = rankedEntries.filter((e) => e.rank > 3);
