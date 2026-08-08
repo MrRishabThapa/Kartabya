@@ -90,11 +90,11 @@ export default function OnboardingPage() {
   };
 
   const onboarding = (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 overflow-hidden">
+    <div className="min-h-screen bg-[#FEF2EA] flex flex-col items-center justify-center p-6 overflow-hidden">
       {/* Progress Bar */}
-      <div className="fixed top-0 left-0 w-full h-2 bg-slate-100">
+      <div className="fixed top-0 left-0 z-10 w-full h-2 bg-[#FBE0CC]">
         <motion.div 
-          className="h-full bg-brand-primary"
+          className="h-full bg-[#F27928]"
           initial={{ width: "0%" }}
           animate={{ width: `${(step / 6) * 100}%` }}
         />
