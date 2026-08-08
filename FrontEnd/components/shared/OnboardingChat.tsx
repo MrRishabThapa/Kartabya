@@ -2,7 +2,7 @@
 import { motion, type Variants } from "framer-motion";
 
 export default function AdaptivChat({ text }: { text: string }) {
-  const characters = text.split("");
+  const words = text.split(" ");
 
   const container: Variants = {
     hidden: { opacity: 0 },
@@ -23,16 +23,19 @@ export default function AdaptivChat({ text }: { text: string }) {
 
   return (
     <motion.div
-      style={{ overflow: "hidden", display: "flex", flexWrap: "wrap" }}
+      style={{ overflow: "hidden" }}
       variants={container}
       initial="hidden"
       animate="visible"
       className="text-2xl md:text-3xl font-medium text-slate-800 leading-snug"
     >
-      {characters.map((char, index) => (
-        <motion.span variants={child} key={index}>
-          {char === " " ? "\u00A0" : char}
-        </motion.span>
+      {words.map((word, index) => (
+        <span key={`${word}-${index}`} className="inline-block">
+          <motion.span variants={child}>
+            {word}
+          </motion.span>
+          {index < words.length - 1 ? "\u00A0" : null}
+        </span>
       ))}
     </motion.div>
   );
