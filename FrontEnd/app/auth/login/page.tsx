@@ -5,11 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import LottieLoader from "@/components/shared/LottieLoader";
 import Button from "@/components/shared/Button";
-import GoogleIcon from "@/components/shared/GoogleIcon";
 import { login } from "@/lib/auth-service";
 import { ApiError } from "@/lib/api";
 import { completeOnboardingDraft } from "@/lib/onboarding-draft";
-import { googleAuthUrl } from "@/lib/google-auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,18 +24,24 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await login(email, password);
-      await completeOnboardingDraft();
-      router.replace("/dashboard");
+      const response = await login(email.trim(), password);
+      if (response.user.is_onboarded) {
+        router.replace("/dashboard");
+      } else if (await completeOnboardingDraft()) {
+        router.replace("/dashboard");
+      } else {
+        router.replace("/onboarding");
+      }
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) {
           setError("Incorrect email or password.");
         } else {
-          setError("Something went wrong.");
+          const detail = err.body?.detail;
+          setError(typeof detail === "string" ? detail : "Could not save your onboarding details.");
         }
       } else {
-        setError("Network error — try again.");
+        setError("Could not reach the local server. Make sure the backend is running.");
       }
     } finally {
       setLoading(false);
@@ -90,21 +94,6 @@ export default function LoginPage() {
             {loading ? "Entering..." : "Get back in"}
           </Button>
 
-          <div className="flex items-center gap-3" aria-hidden="true">
-            <span className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-              or
-            </span>
-            <span className="h-px flex-1 bg-slate-200" />
-          </div>
-
-          <a
-            href={googleAuthUrl}
-            className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border-2 border-[#FBE0CC] bg-white px-4 py-3 font-semibold text-[#C26120] shadow-sm transition hover:border-[#FF8D48] hover:bg-[#FEF2EA] focus:outline-none focus:ring-2 focus:ring-[#FBBF24] focus:ring-offset-2"
-          >
-            <GoogleIcon className="size-5" />
-            Continue with Google
-          </a>
         </form>
 
         <p className="text-center text-sm text-slate-500">
