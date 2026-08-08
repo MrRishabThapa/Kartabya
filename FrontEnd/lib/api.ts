@@ -1,14 +1,14 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_URL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/+$/, "");
 
 if (!API_URL) {
   throw new Error("NEXT_PUBLIC_API_URL is not configured");
 }
 
 export function apiFetch(path: string, options: RequestInit = {}) {
-  const headers = new Headers(options.headers);
+  const headers = new Headers(options.headers || {});
 
   headers.set("ngrok-skip-browser-warning", "true");
-  if (!headers.has("Content-Type")) {
+  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
 
