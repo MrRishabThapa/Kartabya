@@ -82,4 +82,10 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(data),
     }),
+  put: (path: string, data?: any) =>
+    request(path, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: (path: string) => request(path, { method: "DELETE" }),
 };
