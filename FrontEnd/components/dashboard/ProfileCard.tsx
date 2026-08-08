@@ -28,14 +28,14 @@ export default function ProfileCard({ user }: Props) {
         Absolutely positioned, bottom-aligned, so the "cut" of the image
         sits flush with the card's bottom edge creating the "peeking out" effect.
       */}
-      <div className="absolute bottom-0 left-2 sm:left-4 w-42 h-50 sm:w-50 sm:h-58
+      <div className="absolute bottom-0 left-2 sm:left-4 w-42 h-50 sm:w-36 sm:h-48
                       pointer-events-none">
         <Image
-          src="/assets/logo.png"
+          src="/assets/fox-mascot.png"
           alt="Fox mascot"
           fill
           priority
-          className="object-contain object-bottom"
+          className="object-contain  object-bottom"
         />
       </div>
     

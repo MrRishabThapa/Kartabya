@@ -1,15 +1,15 @@
-import type { Metadata } from 'next';
-import type { ReactNode } from 'react';
-import { MOCK_USER } from '@/data/dashboard-mock';
-import Sidebar from '@/components/dashboard/Sidebar';
-import TopBar from '@/components/dashboard/TopBar';
+import type { Metadata } from "next";
+import type { ReactNode } from "react";
+import { MOCK_USER } from "@/data/dashboard-mock";
+import Sidebar from "@/components/dashboard/Sidebar";
+import TopBar from "@/components/dashboard/TopBar";
 // Development: authentication guard temporarily disabled.
 // import SessionGuard from '@/components/shared/SessionGuard';
 
 export const metadata: Metadata = {
   title: {
-    template: '%s · Adaptiv',
-    default: 'Dashboard · Adaptiv',
+    template: "%s · Adaptiv",
+    default: "Dashboard · Adaptiv",
   },
 };
 

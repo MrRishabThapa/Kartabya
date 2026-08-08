@@ -22,7 +22,7 @@ export default function Screen6({
   };
 
   return (
-    <div className="space-y-12 px-6 py-16 bg-white">
+    <div className="space-y-12 px-6 py-16">
 
       {/* ✅ Mountain Animation */}
       <div className="w-72 h-72 mx-auto">

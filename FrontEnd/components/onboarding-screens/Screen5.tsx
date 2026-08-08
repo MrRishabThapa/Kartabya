@@ -11,7 +11,7 @@ export default function Screen5({
   data,
 }: OnboardingScreenProps) {
   return (
-    <div className="flex flex-col items-center text-center space-y-10 px-6 py-16 bg-white">
+    <div className="flex flex-col items-center text-center space-y-10 px-6 py-16">
 
       <div className="w-64 h-64">
         <LottieLoader url="https://assets10.lottiefiles.com/packages/lf20_kyu7xb1v.json" />

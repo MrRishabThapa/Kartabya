@@ -13,7 +13,6 @@ export default function GamesPage() {
     <div className="space-y-6 md:space-y-8">
       <GamesHeader totalGames={GAMES.length} />
 
-      {/* 🎮 All games in one clean grid */}
       <section>
         <div className="flex items-center gap-2 mb-4">
           <div className="w-1 h-5 rounded-full bg-brand-primary" />
@@ -22,11 +21,7 @@ export default function GamesPage() {
           </h2>
         </div>
 
-        {/*
-          Grid: 2 cols mobile → 3 tablet → 4 desktop
-          Cards have aspect-[4/5] so they stay chunky & tile beautifully
-        */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {GAMES.map((game, i) => (
             <GameCard key={game.id} game={game} index={i} />
           ))}

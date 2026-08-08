@@ -25,7 +25,7 @@ export default function Screen4({
   };
 
   return (
-    <div className="space-y-10 px-6 py-16 bg-white">
+    <div className="space-y-10 px-6 py-16">
 
       <Chat text="Pick up to 3 hobbies." />
 

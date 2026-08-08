@@ -11,7 +11,7 @@ export default function Screen2({
   data,
 }: OnboardingScreenProps) {
   return (
-    <div className="space-y-12 px-6 py-16 bg-white">
+    <div className="space-y-12 px-6 py-16">
 
       <div className="w-40 h-40">
         <LottieLoader url="https://assets2.lottiefiles.com/packages/lf20_touohxv0.json" />
