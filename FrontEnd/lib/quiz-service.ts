@@ -1,4 +1,5 @@
-const QUIZ_API_URL = process.env.NEXT_PUBLIC_API_URL!;
+import { apiFetch } from "./api";
+
 const QUIZ_API_KEY = process.env.NEXT_PUBLIC_QUIZ_API_KEY!;
 
 export interface Option {
@@ -28,7 +29,7 @@ export async function generateQuiz(params: {
   content: string;
 }): Promise<BackendQuiz> {
 
-  const res = await fetch(`${QUIZ_API_URL}/v1/quiz`, {
+  const res = await apiFetch("/v1/quiz", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
