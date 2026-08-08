@@ -98,6 +98,15 @@ export interface PersonalizedLesson {
   progress_percent: number;
   completed: boolean;
   reused: boolean;
+  visuals: LessonVisual[];
+}
+
+export interface LessonVisual {
+  id: string;
+  lesson_id: string;
+  title?: string | null;
+  content: string;
+  position: number;
 }
 
 export async function getPersonalizedLesson(lessonId: string) {
@@ -116,7 +125,7 @@ export async function savePersonalizedProgress(personalizedLessonId: string, res
     resume_position: resumePosition,
     progress_percent: progressPercent,
     completed: progressPercent >= 100,
-  });
+  }) as Promise<PersonalizedLesson>;
 }
 
 export async function resolveContentContext(lessonId: string, title: string, bookHint?: string, classSlug = 'class-12'): Promise<ContentContext | null> {
