@@ -12,7 +12,14 @@ export interface BackendQuestion {
 }
 
 export interface BackendQuiz {
+  id: string;
   type: string;
   number_of_qns: number;
   questions: BackendQuestion[];
+}
+
+export interface QuizAttemptResult {
+  attempt_id: string;
+  score: number;
+  total: number;
 }
