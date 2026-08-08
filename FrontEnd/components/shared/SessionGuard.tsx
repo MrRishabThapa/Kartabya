@@ -2,7 +2,8 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { getMe } from "@/lib/auth-service";
+import { getMe, getOnboarding } from "@/lib/auth-service";
+import { useUser } from "@/context/UserContext";
 
 interface SessionGuardProps {
   children: ReactNode;
@@ -16,14 +17,25 @@ export default function SessionGuard({
 }: SessionGuardProps) {
   const router = useRouter();
   const [allowed, setAllowed] = useState(false);
+  const { setAuthUser, setOnboarding } = useUser();
 
   useEffect(() => {
     let active = true;
 
     async function verifySession() {
       try {
-        await getMe();
-        if (active) setAllowed(true);
+        const user = await getMe();
+        if (active) {
+          setAuthUser(user);
+          if (user.is_onboarded) {
+            try {
+              setOnboarding(await getOnboarding());
+            } catch {
+              setOnboarding(null);
+            }
+          }
+          setAllowed(true);
+        }
       } catch {
         router.replace("/auth/login");
       }
@@ -34,7 +46,7 @@ export default function SessionGuard({
     return () => {
       active = false;
     };
-  }, [router]);
+  }, [router, setAuthUser, setOnboarding]);
 
   if (!allowed) {
     return (
