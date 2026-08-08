@@ -6,20 +6,16 @@ import {
   LayoutDashboard,
   BookOpen,
   Trophy,        // ← was ClipboardCheck
-  Award,
   MessageCircle,
   Gamepad2,
-  Map,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
   { icon: LayoutDashboard, label: 'Overview',    href: '/dashboard' },
   { icon: BookOpen,        label: 'Classes',     href: '/dashboard/classes' },
   { icon: Trophy,          label: 'Leaderboard', href: '/dashboard/leaderboard' },
-  { icon: Award,           label: 'Grade',       href: '/dashboard/grade' },
   { icon: MessageCircle,   label: 'Community',       href: '/dashboard/community' },
   { icon: Gamepad2,        label: 'Games',       href: '/dashboard/games' },
-  { icon: Map,             label: 'Visit City',  href: '/learn' },
 ];
 
 export default function Sidebar() {
