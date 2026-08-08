@@ -120,11 +120,14 @@ export async function personalizeLesson(lessonId: string) {
   }) as Promise<PersonalizedLesson>;
 }
 
+const toInt = (value: number) => Math.round(value);
+
 export async function savePersonalizedProgress(personalizedLessonId: string, resumePosition: number, progressPercent: number) {
+  const normalizedProgressPercent = toInt(progressPercent);
   return api.put(`/api/v1/content/personalized-lessons/${encodeURIComponent(personalizedLessonId)}/progress`, {
-    resume_position: resumePosition,
-    progress_percent: progressPercent,
-    completed: progressPercent >= 100,
+    resume_position: toInt(resumePosition),
+    progress_percent: normalizedProgressPercent,
+    completed: normalizedProgressPercent >= 100,
   }) as Promise<PersonalizedLesson>;
 }
 
