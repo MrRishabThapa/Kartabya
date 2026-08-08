@@ -1,10 +1,12 @@
 import { api } from '@/lib/api';
+import type { LessonVisual } from '@/lib/content-api';
 
 export type ChatMessage = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   created_at: string;
+  visuals?: LessonVisual[];
 };
 
 export type ChatSession = {
