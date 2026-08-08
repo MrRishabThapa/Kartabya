@@ -4,7 +4,7 @@ export async function signup(email: string, password: string, name: string) {
   return api.post("/api/v1/auth/signup", {
     email,
     password,
-   
+    name,
   });
 }
 
@@ -14,6 +14,10 @@ export async function login(email: string, password: string) {
 
 export async function getMe() {
   return api.get("/api/v1/auth/me");
+}
+
+export async function getOnboarding() {
+  return api.get("/api/v1/onboard");
 }
 
 export async function logout() {
