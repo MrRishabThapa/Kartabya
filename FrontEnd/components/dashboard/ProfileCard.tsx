@@ -45,6 +45,11 @@ export default function ProfileCard({ user }: Props) {
           {user.name}
         </h2>
         <p className="text-slate-500 text-xs sm:text-sm mt-1">{user.class}</p>
+        {user.companionName && (
+          <p className="text-brand-primary-dark text-xs mt-1">
+            Fox companion: {user.companionName}
+          </p>
+        )}
       </div>
 
       
