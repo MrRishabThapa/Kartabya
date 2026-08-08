@@ -9,6 +9,7 @@ import {
   Award,
   MessageCircle,
   Gamepad2,
+  Map,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
@@ -18,6 +19,7 @@ const NAV_ITEMS = [
   { icon: Award,           label: 'Grade',       href: '/dashboard/grade' },
   { icon: MessageCircle,   label: 'Community',       href: '/dashboard/community' },
   { icon: Gamepad2,        label: 'Games',       href: '/dashboard/games' },
+  { icon: Map,             label: 'Visit City',  href: '/learn' },
 ];
 
 export default function Sidebar() {
