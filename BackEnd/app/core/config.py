@@ -1,13 +1,13 @@
 """Application configuration loaded from environment variables."""
 
-from typing import Any
+from typing import Literal
 
-from pydantic import Field, ValidationInfo, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    """Settings required to run the Google OAuth integration."""
+    """Settings required to run the application and authentication system."""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -16,45 +16,52 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    google_client_id: str = Field(validation_alias="GOOGLE_CLIENT_ID")
-    google_client_secret: str = Field(validation_alias="GOOGLE_CLIENT_SECRET")
-    session_secret_key: str = Field(validation_alias="SESSION_SECRET_KEY")
-    google_redirect_uri: str = Field(
-        default="http://localhost:8000/auth/google/callback",
-        validation_alias="GOOGLE_REDIRECT_URI",
+    database_url: str = Field(
+        default="postgresql+asyncpg://postgres:postgres@localhost:5432/kartabya",
+        validation_alias="DATABASE_URL",
     )
     frontend_url: str = Field(
         default="http://localhost:3000",
         validation_alias="FRONTEND_URL",
     )
+    cors_origins: str | None = Field(
+        default=None,
+        validation_alias="CORS_ORIGINS",
+    )
     session_cookie_secure: bool = Field(
         default=False,
         validation_alias="SESSION_COOKIE_SECURE",
     )
-
-    @field_validator(
-        "google_client_id",
-        "google_client_secret",
-        "session_secret_key",
-        mode="before",
+    session_cookie_samesite: Literal["lax", "strict", "none"] = Field(
+        default="lax",
+        validation_alias="SESSION_COOKIE_SAMESITE",
     )
-    @classmethod
-    def reject_blank_required_value(cls, value: Any, info: ValidationInfo) -> str:
-        """Reject empty secrets that would otherwise pass string validation."""
-        if value is None or not str(value).strip():
-            raise ValueError(f"{info.field_name} must not be empty.")
-        return str(value).strip()
+    auth_session_cookie_name: str = Field(
+        default="kartabya_session",
+        validation_alias="AUTH_SESSION_COOKIE_NAME",
+    )
+    auth_session_ttl_seconds: int = Field(
+        default=604800,
+        validation_alias="AUTH_SESSION_TTL_SECONDS",
+        ge=300,
+    )
+
+    @property
+    def allowed_cors_origins(self) -> list[str]:
+        """Return configured frontend origins plus the local dev defaults."""
+        origins = [
+            self.frontend_url,
+            "http://localhost:3000",
+            "http://localhost:3001",
+        ]
+        if self.cors_origins:
+            origins.extend(self.cors_origins.split(","))
+        return list(dict.fromkeys(origin.strip().rstrip("/") for origin in origins))
 
 
 def get_settings() -> Settings:
-    """Build settings and expose a useful startup error for missing configuration."""
-    try:
-        return Settings()
-    except ValueError as exc:
-        raise RuntimeError(
-            "Invalid OAuth configuration. Set GOOGLE_CLIENT_ID, "
-            "GOOGLE_CLIENT_SECRET, and SESSION_SECRET_KEY in .env."
-        ) from exc
+    """Build application settings from environment variables."""
+    return Settings()
 
 
 settings = get_settings()

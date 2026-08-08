@@ -5,17 +5,22 @@ from collections.abc import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.sessions import SessionMiddleware
 
 from app.api.routes import router as api_router
-from app.auth.routes import router as auth_router
+from app.api.onboarding import router as onboarding_router
+from app.auth.local import router as local_auth_router
 from app.core.config import settings
+from app.db.session import close_db, init_db
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     """Manage application startup and shutdown hooks."""
-    yield
+    await init_db()
+    try:
+        yield
+    finally:
+        await close_db()
 
 
 def create_app() -> FastAPI:
@@ -27,27 +32,17 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # Authlib uses this signed, temporary cookie for OAuth state and PKCE data.
-    # No Google user profile is stored in this session or anywhere else yet.
-    application.add_middleware(
-        SessionMiddleware,
-        secret_key=settings.session_secret_key,
-        session_cookie="kartabya_oauth_state",
-        same_site="lax",
-        https_only=settings.session_cookie_secure,
-    )
-
-    # The Next.js frontend runs on localhost:3000 during development. Keep the
-    # origin explicit because OAuth state is stored in a credentialed cookie.
+    # Credentialed browser sessions require an explicit origin allowlist.
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.frontend_url.rstrip("/")],
+        allow_origins=settings.allowed_cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
     application.include_router(api_router)
-    application.include_router(auth_router)
+    application.include_router(onboarding_router)
+    application.include_router(local_auth_router)
     return application
 
 
