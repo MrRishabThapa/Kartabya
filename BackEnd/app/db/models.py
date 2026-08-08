@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, String, Uuid
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -25,6 +25,7 @@ class User(Base):
     full_name: Mapped[str | None] = mapped_column(String(160), nullable=True)
     avatar_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
     email_verified: Mapped[bool] = mapped_column(default=False)
+    is_onboarded: Mapped[bool] = mapped_column(default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utc_now, onupdate=utc_now
@@ -43,6 +44,9 @@ class User(Base):
         back_populates="user", uselist=False, cascade="all, delete-orphan"
     )
     hobby_links: Mapped[list["UserHobby"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    quizzes: Mapped[list["Quiz"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
@@ -143,3 +147,112 @@ class UserHobby(Base):
 
     user: Mapped[User] = relationship(back_populates="hobby_links")
     hobby: Mapped[Hobby] = relationship(back_populates="user_links")
+
+
+class Quiz(Base):
+    """A personalized quiz generated for a user around a chapter or topic."""
+
+    __tablename__ = "quizzes"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    type: Mapped[str] = mapped_column(String(40), default="Quiz")
+    topic: Mapped[str] = mapped_column(String(500))
+    subject: Mapped[str] = mapped_column(String(120))
+    grade: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    hobbies: Mapped[list[str]] = mapped_column(JSON, default=list)
+    number_of_qns: Mapped[int] = mapped_column(default=5)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=utc_now, onupdate=utc_now
+    )
+
+    user: Mapped[User] = relationship(back_populates="quizzes")
+    questions: Mapped[list["QuizQuestion"]] = relationship(
+        back_populates="quiz",
+        cascade="all, delete-orphan",
+        order_by="QuizQuestion.number",
+    )
+    attempts: Mapped[list["QuizAttempt"]] = relationship(
+        back_populates="quiz", cascade="all, delete-orphan"
+    )
+
+
+class QuizQuestion(Base):
+    """One multiple-choice question belonging to a generated quiz."""
+
+    __tablename__ = "quiz_questions"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    quiz_id: Mapped[UUID] = mapped_column(
+        ForeignKey("quizzes.id", ondelete="CASCADE"), index=True
+    )
+    number: Mapped[int]
+    question: Mapped[str] = mapped_column(String(2000))
+    answer: Mapped[str] = mapped_column(String(1))
+
+    quiz: Mapped[Quiz] = relationship(back_populates="questions")
+    options: Mapped[list["QuizOption"]] = relationship(
+        back_populates="question",
+        cascade="all, delete-orphan",
+        order_by="QuizOption.position",
+    )
+
+
+class QuizOption(Base):
+    """One multiple-choice option, with its explanation, for a question."""
+
+    __tablename__ = "quiz_options"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    question_id: Mapped[UUID] = mapped_column(
+        ForeignKey("quiz_questions.id", ondelete="CASCADE"), index=True
+    )
+    position: Mapped[int]
+    option: Mapped[str] = mapped_column(String(1))
+    text: Mapped[str] = mapped_column(String(2000))
+    description: Mapped[str] = mapped_column(String(2000))
+
+    question: Mapped[QuizQuestion] = relationship(back_populates="options")
+
+
+class QuizAttempt(Base):
+    """One graded attempt of a quiz by its owner."""
+
+    __tablename__ = "quiz_attempts"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    quiz_id: Mapped[UUID] = mapped_column(
+        ForeignKey("quizzes.id", ondelete="CASCADE"), index=True
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), index=True
+    )
+    score: Mapped[int] = mapped_column(default=0)
+    total: Mapped[int] = mapped_column(default=0)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+    quiz: Mapped[Quiz] = relationship(back_populates="attempts")
+    answers: Mapped[list["QuizAnswer"]] = relationship(
+        back_populates="attempt", cascade="all, delete-orphan"
+    )
+
+
+class QuizAnswer(Base):
+    """The option a user selected for one question during an attempt."""
+
+    __tablename__ = "quiz_answers"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    attempt_id: Mapped[UUID] = mapped_column(
+        ForeignKey("quiz_attempts.id", ondelete="CASCADE"), index=True
+    )
+    question_id: Mapped[UUID] = mapped_column(
+        ForeignKey("quiz_questions.id", ondelete="CASCADE")
+    )
+    selected: Mapped[str | None] = mapped_column(String(1), nullable=True)
+    is_correct: Mapped[bool] = mapped_column(default=False)
+
+    attempt: Mapped[QuizAttempt] = relationship(back_populates="answers")

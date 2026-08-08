@@ -40,6 +40,7 @@ class UserResponse(BaseModel):
     name: str | None
     avatar_url: str | None
     email_verified: bool
+    is_onboarded: bool
 
 
 class AuthResponse(BaseModel):

@@ -2,7 +2,7 @@
 
 from typing import Literal
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -44,6 +44,14 @@ class Settings(BaseSettings):
         default=604800,
         validation_alias="AUTH_SESSION_TTL_SECONDS",
         ge=300,
+    )
+    openai_api_key: str = Field(
+        default="",
+        validation_alias=AliasChoices("OPEN_AI_KEY", "OPENAI_API_KEY"),
+    )
+    openai_model: str = Field(
+        default="gpt-4o-mini",
+        validation_alias="OPENAI_MODEL",
     )
 
     @property

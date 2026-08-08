@@ -12,7 +12,6 @@ from app.auth.dependencies import get_current_user
 from app.db.models import Companion, Hobby, User, UserHobby, UserProfile, utc_now
 from app.db.session import get_db
 
-
 router = APIRouter(prefix="/api/v1", tags=["onboarding"])
 
 
@@ -40,11 +39,11 @@ class OnboardingRequest(BaseModel):
     """Validated onboarding payload submitted after authentication."""
 
     userName: str = Field(min_length=1, max_length=160)
-    pandaNickname: str = Field(min_length=1, max_length=80)
+    foxNickname: str = Field(min_length=1, max_length=80)
     hobbies: list[str] = Field(min_length=1, max_length=3)
     targetCourse: TargetCourse
 
-    @field_validator("userName", "pandaNickname")
+    @field_validator("userName", "foxNickname")
     @classmethod
     def validate_text(cls, value: str, info) -> str:
         return clean_required_text(value, info.field_name)
@@ -70,7 +69,7 @@ class OnboardingResponse(BaseModel):
     """The persisted onboarding data returned to the frontend."""
 
     userName: str
-    pandaNickname: str
+    foxNickname: str
     hobbies: list[str]
     targetCourse: TargetCourse
     completedAt: datetime
@@ -104,7 +103,7 @@ async def load_onboarding(
     )
     return OnboardingResponse(
         userName=profile.preferred_name,
-        pandaNickname=companion.nickname,
+        foxNickname=companion.nickname,
         hobbies=list(hobby_result.scalars().all()),
         targetCourse=TargetCourse(
             grade=profile.grade,
@@ -125,6 +124,7 @@ async def save_onboarding(
     db: AsyncSession = Depends(get_db),
 ) -> OnboardingResponse:
     """Create or replace onboarding data for the authenticated user."""
+    user.is_onboarded = True
     profile_result = await db.execute(
         select(UserProfile).where(UserProfile.user_id == user.id)
     )
@@ -143,10 +143,10 @@ async def save_onboarding(
     )
     companion = companion_result.scalar_one_or_none()
     if companion is None:
-        companion = Companion(user_id=user.id, nickname=payload.pandaNickname)
+        companion = Companion(user_id=user.id, nickname=payload.foxNickname)
         db.add(companion)
     else:
-        companion.nickname = payload.pandaNickname
+        companion.nickname = payload.foxNickname
 
     await db.execute(delete(UserHobby).where(UserHobby.user_id == user.id))
     hobby_result = await db.execute(

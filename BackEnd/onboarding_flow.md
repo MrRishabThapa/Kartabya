@@ -30,7 +30,7 @@ POST /api/v1/auth/signup
 POST /api/v1/onboard
 {
   "userName": "Student",
-  "pandaNickname": "Panda",
+  "foxNickname": "Panda",
   "hobbies": ["Reading", "Music"],
   "targetCourse": {
     "grade": "Grade 8",

@@ -11,6 +11,7 @@ from app.api.onboarding import router as onboarding_router
 from app.auth.local import router as local_auth_router
 from app.core.config import settings
 from app.db.session import close_db, init_db
+from app.quiz.routes import router as quiz_router
 
 
 @asynccontextmanager
@@ -43,6 +44,7 @@ def create_app() -> FastAPI:
     application.include_router(api_router)
     application.include_router(onboarding_router)
     application.include_router(local_auth_router)
+    application.include_router(quiz_router)
     return application
 
 
