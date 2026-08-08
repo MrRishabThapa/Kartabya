@@ -100,6 +100,7 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [voiceStatus, setVoiceStatus] = useState('');
+  const [isOrganized, setIsOrganized] = useState(false);
   const dragOrigin = useRef({ x: 0, y: 0 });
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
 
@@ -125,6 +126,7 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
         rotation: [-2, 1.5, -1, 2.5][noteIndex % 4],
       },
     ]);
+    setIsOrganized(false);
     setDraft('');
 
     // Freesound paper-smack style effect; browsers may block remote audio, so failure is silent.
@@ -144,6 +146,9 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
       rotation: 0,
     })));
     setSelectedNoteId(null);
+    setIsOrganized(true);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
   };
 
   const toggleVoiceInput = () => {
@@ -187,8 +192,8 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
       <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
         <div className="flex items-center gap-2"><StickyNote size={17} className="text-brand-primary" /><h2 className="text-sm font-extrabold text-slate-800">My notes</h2></div>
         <div className="flex items-center gap-3">
-          <button type="button" onClick={organizeNotes} disabled={notes.length < 2} className="inline-flex min-h-8 items-center gap-1.5 rounded-lg border border-brand-primary-tint bg-brand-primary-bg px-2.5 text-[11px] font-extrabold text-brand-primary transition-colors hover:bg-brand-primary-tint disabled:cursor-not-allowed disabled:opacity-40" aria-label="Organize notes into a grid">
-            <LayoutGrid size={14} /> Organize
+          <button type="button" onClick={organizeNotes} disabled={notes.length < 2} className={`inline-flex min-h-8 items-center gap-1.5 rounded-lg border px-2.5 text-[11px] font-extrabold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${isOrganized ? 'border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'border-brand-primary-tint bg-brand-primary-bg text-brand-primary hover:bg-brand-primary-tint'}`} aria-label={isOrganized ? 'Notes are organized' : 'Organize notes into a grid'} aria-pressed={isOrganized}>
+            {isOrganized ? <Check size={14} /> : <LayoutGrid size={14} />} {isOrganized ? 'Organized' : 'Organize'}
           </button>
           <span className="hidden text-[11px] font-semibold text-slate-400 sm:inline">Saved automatically</span>
         </div>
@@ -231,6 +236,7 @@ function NotesBoard({ lesson }: { lesson: Lesson }) {
                   const currentX = note.x ?? 30 + (index % 5) * 180;
                   const currentY = note.y ?? 34 + (Math.floor(index / 5) % 6) * 112;
                   saveNotes(notes.map((item) => item.id === note.id ? { ...item, x: Math.max(0, Math.min(802, currentX + info.offset.x / zoom)), y: Math.max(0, Math.min(604, currentY + info.offset.y / zoom)) } : item));
+                  setIsOrganized(false);
                 }}
                 initial={{ opacity: 0, scale: 1.25, y: -34, rotate: (note.rotation ?? 0) - 7 }}
                 animate={{ opacity: 1, scale: 1, y: 0, rotate: note.rotation ?? 0 }}
