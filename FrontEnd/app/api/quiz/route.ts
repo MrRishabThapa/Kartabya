@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    const cookie = req.headers.get("cookie");
 
     const upstream = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/v1/quiz`,
@@ -12,7 +13,7 @@ export async function POST(req: Request) {
         headers: {
           "Content-Type": "application/json",
           "ngrok-skip-browser-warning": "true",
-          "X-API-Key": process.env.QUIZ_API_KEY!,
+          ...(cookie ? { Cookie: cookie } : {}),
         },
         body: JSON.stringify(body),
       }
@@ -32,7 +33,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(data, { status: upstream.status });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Quiz Proxy Error:", error);
 
     return NextResponse.json(
