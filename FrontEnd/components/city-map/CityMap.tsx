@@ -1,14 +1,17 @@
 'use client';
 import { useState, useMemo, useRef, useEffect } from 'react';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   TransformWrapper,
   TransformComponent,
   ReactZoomPanPinchRef,
 } from 'react-zoom-pan-pinch';
-import { RotateCcw, Plus, Minus } from 'lucide-react';
+import { ArrowLeft, Lock, RotateCcw, Plus, Minus } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { DISTRICTS } from '@/data/districts';
+import { api } from '@/lib/api';
+import { CONTENT_BOOK_SLUG } from '@/lib/content-adapter';
+import type { ContentBook } from '@/lib/content-api';
 import DistrictOverlay from './DistrictOverlay';
 import InfoCard from './InfoCard';
 
@@ -16,10 +19,14 @@ const FOCUS_ZOOM = 2; // How much to zoom in when a district is tapped
 const MIN_ZOOM = 0.9;
 const MAX_ZOOM = 4;
 
+type MapDistrict = (typeof DISTRICTS)[number] & { isLocked: boolean };
+
 export default function CityMap() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [contentBook, setContentBook] = useState<ContentBook | null>(null);
+  const router = useRouter();
   const transformRef = useRef<ReactZoomPanPinchRef>(null);
   const mapInnerRef = useRef<HTMLDivElement>(null);
 
@@ -30,15 +37,32 @@ export default function CityMap() {
     return () => window.removeEventListener('resize', check);
   }, []);
 
-  const selected = useMemo(
-    () => DISTRICTS.find((d) => d.id === selectedId) ?? null,
-    [selectedId]
-  );
-  const hovered = useMemo(
-    () => DISTRICTS.find((d) => d.id === hoveredId) ?? null,
-    [hoveredId]
-  );
+  useEffect(() => {
+    void api.get(`/api/v1/content/books/${CONTENT_BOOK_SLUG}`).then((book) => setContentBook(book as ContentBook)).catch(() => undefined);
+  }, []);
 
+  const districts = useMemo<MapDistrict[]>(() => DISTRICTS.map((district) => {
+    const chapterSlug = district.id === 'database'
+      ? 'database-management-system-dbms'
+      : district.id === 'web-technology'
+        ? 'web-technology-ii'
+        : district.id === 'networking'
+          ? 'data-communication-and-networking'
+          : null;
+    const chapter = contentBook?.chapters?.find((item) => item.slug === chapterSlug);
+    const totalLessons = chapter?.topics?.reduce((total, topic) => total + (topic.lessons?.length ?? 0), 0);
+    return {
+      ...district,
+      courseTitle: chapter?.title ?? district.courseTitle,
+      totalLessons: totalLessons ?? district.totalLessons,
+      isLocked: Boolean(contentBook && !chapter),
+    };
+  }), [contentBook]);
+
+  const selected = useMemo(
+    () => districts.find((d) => d.id === selectedId) ?? null,
+    [districts, selectedId]
+  );
   /**
    * 🎯 Smoothly zoom + pan so the selected district lands at a target
    * viewport position (left-center on desktop, upper-center on mobile).
@@ -46,7 +70,7 @@ export default function CityMap() {
   const focusDistrict = (id: string) => {
   setSelectedId(id);
 
-  const district = DISTRICTS.find((d) => d.id === id);
+  const district = districts.find((d) => d.id === id);
   if (!district || !transformRef.current || !mapInnerRef.current) return;
 
   const mapEl = mapInnerRef.current;
@@ -138,7 +162,7 @@ export default function CityMap() {
     <img
       src="/assets/city-map.svg"
       alt=""
-      className="absolute inset-0 w-full h-full select-none"
+      className="illustration-theme-image absolute inset-0 h-full w-full select-none"
       draggable={false}
       style={{ objectFit: 'contain' }}
     />
@@ -151,13 +175,14 @@ export default function CityMap() {
               className="absolute inset-0 w-full h-full"
               style={{ pointerEvents: 'none' }}
             >
-              {DISTRICTS.map((d) => (
+              {districts.map((d) => (
                 <DistrictOverlay
                   key={d.id}
                   district={d}
                   isHovered={hoveredId === d.id}
                   isSelected={selectedId === d.id}
                   isDimmed={!!(selectedId || hoveredId) && (selectedId ?? hoveredId) !== d.id}
+                  isLocked={d.isLocked}
                   onHover={setHoveredId}
                   onClick={focusDistrict}
                 />
@@ -165,7 +190,7 @@ export default function CityMap() {
             </svg>
 
             {/* Persistent district labels (small pills) */}
-            {DISTRICTS.map((d) => (
+            {districts.map((d) => (
               <motion.div
                 key={`label-${d.id}`}
                 className="absolute pointer-events-none z-10
@@ -194,8 +219,8 @@ export default function CityMap() {
                 }}
                 transition={{ duration: 0.2 }}
               >
-                <d.Icon size={10} style={{ color: d.color }} strokeWidth={2.5} />
-                <span>{d.name}</span>
+                {d.isLocked ? <Lock size={10} className="text-slate-300" strokeWidth={2.5} /> : <d.Icon size={10} style={{ color: d.color }} strokeWidth={2.5} />}
+                <span>{d.isLocked ? 'Locked' : d.name}</span>
               </motion.div>
             ))}
           </div>
@@ -204,13 +229,18 @@ export default function CityMap() {
 
       {/* 🎯 Header */}
       <div className="absolute top-4 md:top-6 left-4 md:left-6 z-40 pointer-events-none max-w-[70%]">
-        <div className="inline-block bg-white/85 backdrop-blur-md border border-slate-200 p-3 md:p-5 rounded-xl shadow-lg">
-          <h1 className="text-lg md:text-2xl lg:text-3xl font-extrabold text-slate-800 tracking-tight">
+        <div className="inline-flex items-start gap-3 bg-white/85 backdrop-blur-md border border-slate-200 p-3 md:p-5 rounded-xl shadow-lg pointer-events-auto">
+          <button type="button" onClick={() => router.push('/dashboard/classes')} aria-label="Exit to classes" className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white/80 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
+            <ArrowLeft size={18} strokeWidth={2.5} />
+          </button>
+          <div>
+            <h1 className="text-lg md:text-2xl lg:text-3xl font-extrabold text-slate-800 tracking-tight">
                   Computer Area
-          </h1>
-          <p className="text-[11px] md:text-sm text-slate-500 mt-0.5 font-medium">
-            Class 12 · NEB · {isMobile ? 'Drag to explore' : 'Hover & click a district'}
-          </p>
+            </h1>
+            <p className="text-[11px] md:text-sm text-slate-500 mt-0.5 font-medium">
+              Class 12 · NEB · {isMobile ? 'Drag to explore' : 'Hover & click a district'}
+            </p>
+          </div>
         </div>
       </div>
 
