@@ -24,7 +24,7 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
       <Sidebar />
       <div className="min-h-screen md:ml-24">
         <div className="mx-auto max-w-7xl p-4 md:p-6 lg:p-8">
-          <TopBar user={user} notificationCount={5} />
+          <TopBar user={user} />
           <main>{children}</main>
         </div>
       </div>
