@@ -1,6 +1,7 @@
 export interface UserProfile {
   name: string;
   class: string;
+  companionName?: string;
   avatarUrl?: string;
   streakDays: number;
   totalXp: number;
