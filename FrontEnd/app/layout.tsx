@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { UserProvider } from "@/context/UserContext";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: { template: '%s · Adaptiv', default: 'Adaptiv — Adaptive Learning for Curious Minds' },
@@ -15,7 +16,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white text-slate-900 antialiased">
-        <UserProvider>{children}</UserProvider>
+        <UserProvider>
+          {children}
+          <Toaster position="top-right" richColors closeButton />
+        </UserProvider>
       </body>
     </html>
   );
