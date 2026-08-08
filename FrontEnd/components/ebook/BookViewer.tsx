@@ -37,7 +37,7 @@ export default function BookViewer({
 
   return (
     <div
-      className={`${embedded ? "h-full min-h-0 px-1 py-1 sm:px-2 sm:py-2" : "h-screen px-4 py-4"} flex flex-col overflow-hidden bg-slate-50`}
+      className={`${embedded ? "h-full min-h-0 px-1 py-1 sm:px-2 sm:py-2" : "h-screen px-4 py-4"} flex min-h-0 flex-col overflow-hidden bg-slate-50`}
     >
       {/* Lesson content */}
       <div
@@ -52,7 +52,7 @@ export default function BookViewer({
               : 100;
           onProgress?.(element.scrollTop, progressPercent);
         }}
-        className="min-h-0 flex-1 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm scrollbar-hidden"
+        className="adaptiv-scroll min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-white shadow-sm"
       >
         {book.pages.map((page, index) => (
           <BookPage key={index} page={page} pageNumber={index + 1} />

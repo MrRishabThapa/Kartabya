@@ -57,6 +57,29 @@ const NOTE_CANVAS_WIDTH = 1200;
 const NOTE_CANVAS_HEIGHT = 1120;
 const PAPER_SLAP_SOUND =
   "https://orangefreesounds.com/wp-content/uploads/2015/10/Slap-sound-effect.mp3";
+const WORKSPACE_LAYOUT_KEY = "adaptiv:lesson-workspace-layout";
+
+function clampLayoutValue(value: unknown, minimum: number, maximum: number, fallback: number) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.min(maximum, Math.max(minimum, value))
+    : fallback;
+}
+
+function getStoredWorkspaceLayout() {
+  const fallback = { lessonWidthPct: 65, notesHeightPct: 45 };
+  if (typeof window === "undefined") return fallback;
+  try {
+    const saved = JSON.parse(
+      window.localStorage.getItem(WORKSPACE_LAYOUT_KEY) ?? "null",
+    ) as Partial<typeof fallback> | null;
+    return {
+      lessonWidthPct: clampLayoutValue(saved?.lessonWidthPct, 40, 80, fallback.lessonWidthPct),
+      notesHeightPct: clampLayoutValue(saved?.notesHeightPct, 20, 80, fallback.notesHeightPct),
+    };
+  } catch {
+    return fallback;
+  }
+}
 
 function timestamp() {
   return Date.now();
@@ -121,6 +144,147 @@ function constrainNotePosition(note: StickyNoteItem, index: number): StickyNoteI
     x: Math.max(0, Math.min(NOTE_CANVAS_WIDTH - dimensions.width, note.x ?? fallback.x)),
     y: Math.max(0, Math.min(NOTE_CANVAS_HEIGHT - dimensions.height, note.y ?? fallback.y)),
   };
+}
+
+function HorizontalResizablePanel({
+  children,
+  width,
+  onWidthChange,
+  label,
+  onResizingChange,
+}: {
+  children: React.ReactNode;
+  width: number;
+  onWidthChange: (width: number) => void;
+  label: string;
+  onResizingChange?: (isResizing: boolean) => void;
+}) {
+  const startRef = useRef<{ x: number; width: number } | null>(null);
+
+  const stopResize = () => {
+    startRef.current = null;
+    onResizingChange?.(false);
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", stopResize);
+    window.removeEventListener("pointercancel", stopResize);
+  };
+
+  const handlePointerMove = (event: PointerEvent) => {
+    if (!startRef.current) return;
+    const nextWidth = Math.min(
+      80,
+      Math.max(
+        40,
+        startRef.current.width +
+          ((event.clientX - startRef.current.x) / window.innerWidth) * 100,
+      ),
+    );
+    onWidthChange(nextWidth);
+  };
+
+  const startResize = (event: React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    startRef.current = { x: event.clientX, width };
+    onResizingChange?.(true);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", stopResize);
+    window.addEventListener("pointercancel", stopResize);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      onWidthChange(Math.max(40, width - 2));
+    }
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      onWidthChange(Math.min(80, width + 2));
+    }
+  };
+
+  return (
+    <div className="relative min-h-0 w-full overflow-hidden">
+      <div className="h-full min-h-0">{children}</div>
+      <button
+        type="button"
+        aria-label={`Resize ${label} panel horizontally`}
+        title={`Resize ${label}`}
+        onPointerDown={startResize}
+        onKeyDown={handleKeyDown}
+        className="group absolute -right-2 inset-y-3 z-20 hidden w-4 cursor-col-resize touch-none select-none items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary lg:flex"
+      >
+        <span className="h-16 w-1 rounded-full bg-brand-primary/25 transition-colors group-hover:bg-brand-primary group-focus-visible:bg-brand-primary" />
+      </button>
+    </div>
+  );
+}
+
+function VerticalResizeHandle({
+  height,
+  onHeightChange,
+  onResizingChange,
+}: {
+  height: number;
+  onHeightChange: (height: number) => void;
+  onResizingChange?: (isResizing: boolean) => void;
+}) {
+  const startRef = useRef<{ y: number; height: number } | null>(null);
+
+  const stopResize = () => {
+    startRef.current = null;
+    onResizingChange?.(false);
+    window.removeEventListener("pointermove", handlePointerMove);
+    window.removeEventListener("pointerup", stopResize);
+    window.removeEventListener("pointercancel", stopResize);
+  };
+
+  const handlePointerMove = (event: PointerEvent) => {
+    if (!startRef.current) return;
+    const rightColumn = document.querySelector<HTMLElement>("[data-resize-column]");
+    const columnHeight = rightColumn?.clientHeight || window.innerHeight;
+    const nextHeight = Math.min(
+      80,
+      Math.max(
+        20,
+        startRef.current.height +
+          ((event.clientY - startRef.current.y) / columnHeight) * 100,
+      ),
+    );
+    onHeightChange(nextHeight);
+  };
+
+  const startResize = (event: React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    startRef.current = { y: event.clientY, height };
+    onResizingChange?.(true);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", stopResize);
+    window.addEventListener("pointercancel", stopResize);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      onHeightChange(Math.max(20, height - 2));
+    }
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      onHeightChange(Math.min(80, height + 2));
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label="Resize sticky notes and tutor panels vertically"
+      title="Resize notes and tutor"
+      onPointerDown={startResize}
+      onKeyDown={handleKeyDown}
+      className="group absolute inset-x-3 -bottom-2 z-20 hidden h-4 cursor-row-resize touch-none select-none items-center justify-center rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary lg:flex"
+    >
+      <span className="h-1 w-16 rounded-full bg-brand-primary/25 transition-colors group-hover:bg-brand-primary group-focus-visible:bg-brand-primary" />
+    </button>
+  );
 }
 
 function NotesBoard({
@@ -476,7 +640,7 @@ function NotesBoard({
   return (
     <section
       ref={notesBoardRef}
-      className={`relative flex min-h-0 flex-1 flex-col overflow-hidden border border-slate-200 bg-white shadow-sm ${isFullscreen ? "h-[100dvh] w-screen rounded-none" : "rounded-2xl"}`}
+      className={`relative flex h-full min-h-0 w-full flex-col overflow-hidden border border-slate-200 bg-white shadow-sm ${isFullscreen ? "h-[100dvh] w-screen rounded-none" : "rounded-2xl"}`}
     >
       <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
         <div className="flex items-center gap-2">
@@ -525,7 +689,7 @@ function NotesBoard({
         </div>
       </div>
       <div
-        className="relative min-h-0 flex-1 overflow-hidden bg-[#e8edf2] p-3"
+        className="adaptiv-scroll relative min-h-0 flex-1 overflow-hidden overscroll-contain bg-[#e8edf2] p-3"
         onWheel={(event) => {
           event.preventDefault();
           changeZoom(event.deltaY > 0 ? -0.08 : 0.08);
@@ -927,7 +1091,41 @@ export default function LessonWorkspace({
   const [noteComposerOpen, setNoteComposerOpen] = useState(false);
   const [isLessonFullScreen, setIsLessonFullScreen] = useState(false);
   const [selectionPoint, setSelectionPoint] = useState({ x: 0, y: 0 });
+  const [workspaceLayout, setWorkspaceLayout] = useState(getStoredWorkspaceLayout);
+  const [isResizing, setIsResizing] = useState(false);
   const unitIndex = unit.lessons.findIndex((item) => item.id === lesson.id);
+
+  useEffect(() => {
+    const saveTimer = window.setTimeout(() => {
+      window.localStorage.setItem(
+        WORKSPACE_LAYOUT_KEY,
+        JSON.stringify(workspaceLayout),
+      );
+    }, 200);
+    return () => window.clearTimeout(saveTimer);
+  }, [workspaceLayout]);
+
+  useEffect(() => {
+    const handleWindowResize = () => {
+      setWorkspaceLayout((current) => ({
+        lessonWidthPct: clampLayoutValue(current.lessonWidthPct, 40, 80, 65),
+        notesHeightPct: clampLayoutValue(current.notesHeightPct, 20, 80, 45),
+      }));
+    };
+    window.addEventListener("resize", handleWindowResize);
+    return () => window.removeEventListener("resize", handleWindowResize);
+  }, []);
+
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
+  const lessonPanelWidth = workspaceLayout.lessonWidthPct;
+  const notesPanelHeight = workspaceLayout.notesHeightPct;
 
   useEffect(() => {
     if (!isLessonFullScreen) return;
@@ -1004,7 +1202,7 @@ export default function LessonWorkspace({
 
   return (
     <main
-      className={`flex h-[100dvh] min-h-[640px] flex-col overflow-hidden bg-slate-50 ${isLessonFullScreen ? "relative" : ""}`}
+      className={`flex h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-slate-50 ${isLessonFullScreen ? "relative" : ""} ${isResizing ? "select-none [&_iframe]:pointer-events-none" : ""}`}
     >
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 bg-white px-4 py-3 sm:px-6">
         <Link
@@ -1032,7 +1230,8 @@ export default function LessonWorkspace({
         </button>
       </header>
       <div
-        className={`relative grid min-h-0 flex-1 grid-cols-1 transition-all duration-300 ${isLessonFullScreen ? "gap-0 p-0" : "gap-3 p-3 sm:gap-4 sm:p-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.75fr)] lg:p-4 xl:grid-cols-[minmax(0,1.65fr)_minmax(360px,0.7fr)]"}`}
+      className={`relative min-h-0 flex-1 overflow-hidden transition-all duration-300 ${isLessonFullScreen ? "p-0" : "grid grid-cols-1 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] items-stretch gap-3 p-3 sm:gap-4 sm:p-4 lg:grid-rows-1 lg:grid-cols-[var(--lesson-width)_var(--side-width)] lg:p-4"}`}
+        style={{ "--lesson-width": `${lessonPanelWidth}%`, "--side-width": `${100 - lessonPanelWidth}%`, "--notes-height": `${notesPanelHeight}%`, "--chat-height": `${100 - notesPanelHeight}%` } as React.CSSProperties}
       >
         {selectedText && (
           <div
@@ -1071,51 +1270,74 @@ export default function LessonWorkspace({
             </button>
           </div>
         )}
-        <section
-          className={`relative min-h-0 overflow-hidden border border-slate-200 bg-white shadow-sm transition-all duration-300 ${isLessonFullScreen ? "fixed inset-0 z-[100] h-[100dvh] w-screen rounded-none" : "rounded-2xl"}`}
+        <HorizontalResizablePanel
+          width={lessonPanelWidth}
+          onWidthChange={(width) =>
+            setWorkspaceLayout((current) => ({ ...current, lessonWidthPct: width }))
+          }
+          label="lesson"
+          onResizingChange={setIsResizing}
         >
-          <button
-            type="button"
-            onClick={() => setIsLessonFullScreen((value) => !value)}
-            aria-label={
-              isLessonFullScreen
-                ? "Exit full screen"
-                : "Open lesson in full screen"
-            }
-            aria-pressed={isLessonFullScreen}
-            title={isLessonFullScreen ? "Exit full screen" : "Full screen"}
-            className="absolute right-3 top-3 z-20 grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white/90 text-slate-500 shadow-sm backdrop-blur transition-colors duration-200 hover:bg-white hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+          <section
+            className={`relative h-full min-h-0 overflow-hidden border border-slate-200 bg-white shadow-sm transition-all duration-300 ${isLessonFullScreen ? "fixed inset-0 z-[100] h-[100dvh] w-screen rounded-none" : "rounded-2xl"}`}
           >
-            {isLessonFullScreen ? (
-              <Minimize2 size={17} />
-            ) : (
-              <Maximize2 size={17} />
-            )}
-          </button>
-          <EBookContainer
-            lessonId={contentContext?.lesson.id ?? lesson.id}
-            contentLesson={contentContext?.lesson}
-            topic={lesson.title}
-            bookTitle={unit.courseTitle}
-            embedded
-          />
-        </section>
-        {!isLessonFullScreen && (
-          <div className="grid min-h-0 grid-rows-2 gap-3 sm:gap-4">
-            <NotesBoard
-              lesson={lesson}
-              contentContext={contentContext}
-              selectedText={noteSelection}
-              openComposer={noteComposerOpen}
-              onSelectedTextConsumed={() => setNoteSelection(null)}
-              onComposerClose={() => setNoteComposerOpen(false)}
-            />
-            <LessonTutor
+            <button
+              type="button"
+              onClick={() => setIsLessonFullScreen((value) => !value)}
+              aria-label={
+                isLessonFullScreen
+                  ? "Exit full screen"
+                  : "Open lesson in full screen"
+              }
+              aria-pressed={isLessonFullScreen}
+              title={isLessonFullScreen ? "Exit full screen" : "Full screen"}
+              className="absolute right-3 top-3 z-20 grid h-10 w-10 place-items-center rounded-xl border border-slate-200 bg-white/90 text-slate-500 shadow-sm backdrop-blur transition-colors duration-200 hover:bg-white hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary"
+            >
+              {isLessonFullScreen ? (
+                <Minimize2 size={17} />
+              ) : (
+                <Maximize2 size={17} />
+              )}
+            </button>
+            <EBookContainer
               lessonId={contentContext?.lesson.id ?? lesson.id}
-              lessonTitle={lesson.title}
-              selectedText={selectedText}
-              onClearSelectedText={() => setSelectedText(null)}
+              contentLesson={contentContext?.lesson}
+              topic={lesson.title}
+              bookTitle={unit.courseTitle}
+              embedded
             />
+          </section>
+        </HorizontalResizablePanel>
+        {!isLessonFullScreen && (
+          <div
+            data-resize-column
+            className="grid h-full min-h-0 overflow-hidden grid-rows-2 gap-3 sm:gap-4 lg:grid-rows-[var(--notes-height)_var(--chat-height)]"
+          >
+            <div className="relative h-full min-h-0 overflow-hidden">
+              <NotesBoard
+                lesson={lesson}
+                contentContext={contentContext}
+                selectedText={noteSelection}
+                openComposer={noteComposerOpen}
+                onSelectedTextConsumed={() => setNoteSelection(null)}
+                onComposerClose={() => setNoteComposerOpen(false)}
+              />
+              <VerticalResizeHandle
+                height={notesPanelHeight}
+                onHeightChange={(height) =>
+                  setWorkspaceLayout((current) => ({ ...current, notesHeightPct: height }))
+                }
+                onResizingChange={setIsResizing}
+              />
+            </div>
+            <div className="h-full min-h-0 overflow-hidden">
+              <LessonTutor
+                lessonId={contentContext?.lesson.id ?? lesson.id}
+                lessonTitle={lesson.title}
+                selectedText={selectedText}
+                onClearSelectedText={() => setSelectedText(null)}
+              />
+            </div>
           </div>
         )}
       </div>

@@ -75,6 +75,13 @@ export default function MarkdownContent({ markdown }: MarkdownContentProps) {
               <blockquote className="markdown-callout">{children}</blockquote>
             );
           },
+          table({ children }) {
+            return (
+              <div className="markdown-table-scroll adaptiv-scroll">
+                <table>{children}</table>
+              </div>
+            );
+          },
           a({ children, href, ...props }) {
             const external = href?.startsWith("http");
             return (

@@ -248,7 +248,7 @@ export default function LessonTutor({ lessonId, lessonTitle, selectedText, onCle
   };
 
   return (
-    <section className={`${fullScreen ? 'fixed inset-3 z-50 h-[calc(100dvh-1.5rem)] shadow-2xl' : 'relative'} flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm`}>
+    <section className={`${fullScreen ? 'fixed inset-3 z-50 h-[calc(100dvh-1.5rem)] shadow-2xl' : 'relative'} flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm`}>
       <div className="flex shrink-0 items-center gap-2 border-b border-slate-100 px-4 py-3">
         <span className="grid h-7 w-7 place-items-center rounded-lg bg-brand-primary-bg text-brand-primary"><Bot size={16} /></span>
         <div className="min-w-0 flex-1"><h2 className="text-sm font-extrabold text-slate-800">Ask about this lesson</h2><p className="truncate text-[10px] font-semibold text-emerald-600">{lessonTitle}</p></div>
@@ -257,7 +257,7 @@ export default function LessonTutor({ lessonId, lessonTitle, selectedText, onCle
         </button>
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 scrollbar-hidden">
+      <div ref={scrollRef} className="adaptiv-scroll min-h-0 flex-1 space-y-3 overflow-x-hidden overflow-y-auto overscroll-contain p-4">
         {loading && <div className="flex items-center justify-center gap-2 py-8 text-xs font-semibold text-slate-400"><Loader2 size={16} className="animate-spin" /> Loading your tutor session…</div>}
         {!loading && !messages.length && !error && <div className="rounded-2xl bg-slate-50 p-4 text-center text-xs leading-5 text-slate-500"><Sparkles size={18} className="mx-auto mb-2 text-brand-primary" />Ask for an explanation, a hint, or help understanding the lesson.</div>}
         {messages.map((message) => (
