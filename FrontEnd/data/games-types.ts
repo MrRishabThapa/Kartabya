@@ -11,6 +11,7 @@ export interface Game {
   // 🎨 Visual identity
   gradient: string;                 // Tailwind gradient classes
   graphic: string;                  // Emoji or path to image
+  bannerSrc?: string;               // Optional 9:16 Canva banner path
   stat?: { label: string; value: string };
 
   // 📊 Metadata
