@@ -124,7 +124,7 @@ async def save_onboarding(
     db: AsyncSession = Depends(get_db),
 ) -> OnboardingResponse:
     """Create or replace onboarding data for the authenticated user."""
-    user.is_onboarded = True
+    user._is_onboarded = True
     profile_result = await db.execute(
         select(UserProfile).where(UserProfile.user_id == user.id)
     )

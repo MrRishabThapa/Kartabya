@@ -124,8 +124,12 @@ async def logout(
     session = await find_active_session(
         db, request.cookies.get(settings.auth_session_cookie_name)
     )
-    if session is not None:
-        session.revoked_at = datetime.now(UTC)
-        await db.commit()
     clear_session_cookie(response)
+    if session is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required.",
+        )
+    session.revoked_at = datetime.now(UTC)
+    await db.commit()
     return {"ok": True}

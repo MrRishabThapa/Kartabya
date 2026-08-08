@@ -28,6 +28,10 @@ class Settings(BaseSettings):
         default=None,
         validation_alias="CORS_ORIGINS",
     )
+    cors_origin_regex: str | None = Field(
+        default=None,
+        validation_alias="CORS_ORIGIN_REGEX",
+    )
     session_cookie_secure: bool = Field(
         default=False,
         validation_alias="SESSION_COOKIE_SECURE",
@@ -66,7 +70,13 @@ class Settings(BaseSettings):
         ]
         if self.cors_origins:
             origins.extend(self.cors_origins.split(","))
-        return list(dict.fromkeys(origin.strip().rstrip("/") for origin in origins))
+        return list(
+            dict.fromkeys(
+                origin.strip().rstrip("/")
+                for origin in origins
+                if origin.strip()
+            )
+        )
 
 
 def get_settings() -> Settings:

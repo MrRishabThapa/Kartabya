@@ -73,4 +73,16 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 Credentialed requests are enabled for the configured `FRONTEND_URL` so the
 session cookie works across the local frontend/backend origins.
 For a frontend running on a different port or domain, add it to the
-comma-separated `CORS_ORIGINS` setting.
+comma-separated `CORS_ORIGINS` setting. The value must be the frontend's
+origin (for example, `https://my-frontend.ngrok-free.app`), not the backend
+API URL. Restart the backend after changing it.
+
+For temporary ngrok frontend URLs, `CORS_ORIGIN_REGEX` can be used instead of
+listing one changing subdomain. Keep the regex restricted to the ngrok domain
+you use; do not use `.*` with credentialed requests. For example:
+
+```env
+CORS_ORIGIN_REGEX=^https://([a-z0-9-]+)\.ngrok-free\.app$
+SESSION_COOKIE_SECURE=true
+SESSION_COOKIE_SAMESITE=none
+```

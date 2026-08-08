@@ -126,7 +126,8 @@ returns `401`, redirect to `/auth/login`; otherwise render the dashboard.
 If login succeeds but the dashboard immediately returns to `/auth/login`, open
 the browser Network tab. A CORS error on `/api/v1/auth/me` or
 `/api/v1/onboard` means the frontend's exact origin is absent from
-`FRONTEND_URL` or `CORS_ORIGINS`.
+`FRONTEND_URL` or `CORS_ORIGINS`. For ngrok, configure the frontend URL (not
+the backend URL), or use a restricted `CORS_ORIGIN_REGEX`.
 
 Do not use `Access-Control-Allow-Origin: *` with credentialed cookies. Add the
 specific frontend origin instead, then restart the backend.
