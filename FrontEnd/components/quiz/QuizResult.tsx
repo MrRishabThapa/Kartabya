@@ -34,6 +34,10 @@ export default function QuizResult({ score, total, onRestart }: Props) {
         {percentage}%
       </div>
 
+      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
+        +{score * 10} XP added to your leaderboard score
+      </div>
+
       <Button onClick={onRestart}>
         Try Again
       </Button>
