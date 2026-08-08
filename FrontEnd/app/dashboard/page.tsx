@@ -7,6 +7,7 @@ import SuggestedActivities from "@/components/dashboard/SuggestedActivities";
 import AverageStudyTime from "@/components/dashboard/AverageStudyTime";
 import YourProgress from "@/components/dashboard/YourProgress";
 import RecentHistory from "@/components/dashboard/RecentHistory";
+import SavedNotes from "@/components/dashboard/SavedNotes";
 
 export default function DashboardPage() {
   const { authUser, onboarding } = useUser();
@@ -30,6 +31,7 @@ export default function DashboardPage() {
       <div className="space-y-4 md:space-y-6">
         <AverageStudyTime />
         <RecentHistory />
+        <SavedNotes />
       </div>
     </div>
   );
