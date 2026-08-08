@@ -61,6 +61,8 @@ class Settings(BaseSettings):
             self.frontend_url,
             "http://localhost:3000",
             "http://localhost:3001",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:3001",
         ]
         if self.cors_origins:
             origins.extend(self.cors_origins.split(","))

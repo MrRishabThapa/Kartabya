@@ -18,7 +18,11 @@ def normalize_email(email: str) -> str:
 
 async def find_user_by_email(db: AsyncSession, email: str) -> User | None:
     """Find a user by normalized email."""
-    result = await db.execute(select(User).where(User.email == normalize_email(email)))
+    result = await db.execute(
+        select(User)
+        .options(selectinload(User.profile))
+        .where(User.email == normalize_email(email))
+    )
     return result.scalar_one_or_none()
 
 
@@ -46,7 +50,9 @@ async def find_active_session(
 
     result = await db.execute(
         select(AuthSession)
-        .options(selectinload(AuthSession.user))
+        .options(
+            selectinload(AuthSession.user).selectinload(User.profile)
+        )
         .where(
             AuthSession.token_hash == hash_session_token(raw_token),
             AuthSession.revoked_at.is_(None),

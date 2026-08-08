@@ -55,6 +55,11 @@ class User(Base):
         """Expose the public display name expected by API schemas."""
         return self.full_name
 
+    @property
+    def is_onboarded(self) -> bool:
+        """Whether the user has completed the onboarding profile."""
+        return self.profile is not None and self.profile.onboarding_completed_at is not None
+
 
 class AuthSession(Base):
     """Server-side login session; only its hash is stored in PostgreSQL."""
