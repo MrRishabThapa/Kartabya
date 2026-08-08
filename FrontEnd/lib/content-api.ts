@@ -20,6 +20,14 @@ export interface ContentContext {
   lesson: ContentLesson;
 }
 
+export interface ContentClass {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string | null;
+  books?: ContentBookSummary[];
+}
+
 export interface ContentBookSummary {
   id: string;
   title: string;
@@ -61,6 +69,10 @@ function findLesson(book: ContentBook, lessonId: string, title: string) {
 
 export async function listContentBooks() {
   return api.get('/api/v1/content/books') as Promise<ContentBookSummary[]>;
+}
+
+export async function listContentClasses() {
+  return api.get('/api/v1/content/classes') as Promise<ContentClass[]>;
 }
 
 export async function getContentBook(bookSlug: string) {
@@ -107,7 +119,7 @@ export async function savePersonalizedProgress(personalizedLessonId: string, res
   });
 }
 
-export async function resolveContentContext(lessonId: string, title: string, bookHint?: string, classSlug = 'computer-science'): Promise<ContentContext | null> {
+export async function resolveContentContext(lessonId: string, title: string, bookHint?: string, classSlug = 'class-12'): Promise<ContentContext | null> {
   const books = await listContentBooks();
   const normalizedHint = bookHint?.trim().toLowerCase();
   const orderedBooks = [...books].sort((left, right) => {
@@ -124,8 +136,12 @@ export async function resolveContentContext(lessonId: string, title: string, boo
       const lesson = await getContentLessonByPath(book.slug, match.chapter.slug, match.topic.slug, match.lesson.slug);
       let classId: string | undefined;
       try {
-        const contentClass = await api.get(`/api/v1/content/classes/${encodeURIComponent(classSlug)}`) as { id?: string };
-        classId = contentClass.id;
+        const classes = await listContentClasses();
+        const preferredClass = classes.find((item) => item.slug === classSlug) ?? classes[0];
+        if (preferredClass) {
+          const contentClass = await api.get(`/api/v1/content/classes/${encodeURIComponent(preferredClass.slug)}`) as ContentClass;
+          classId = contentClass.id || preferredClass.id;
+        }
       } catch {
         // Class metadata is only needed for sticky-note writes; reading still works without it.
       }
@@ -140,14 +156,26 @@ export interface ContentStickyNote {
   id: string;
   lesson_id: string;
   note: string;
+  class_id?: string;
   class_title?: string | null;
+  class_slug?: string | null;
+  book_id?: string;
   book_title?: string | null;
+  book_slug?: string | null;
+  chapter_id?: string;
   chapter_title?: string | null;
+  chapter_slug?: string | null;
+  topic_id?: string;
   topic_title?: string | null;
+  topic_slug?: string | null;
   lesson_title?: string | null;
+  lesson_slug?: string | null;
+  lesson_filename?: string | null;
   selected_text?: string | null;
   anchor_start?: number | null;
   anchor_end?: number | null;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export async function getLessonStickyNotes(lessonId: string) {
