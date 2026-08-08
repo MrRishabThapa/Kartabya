@@ -5,14 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import LottieLoader from "@/components/shared/LottieLoader";
 import Button from "@/components/shared/Button";
-import GoogleIcon from "@/components/shared/GoogleIcon";
 import { signup, login } from "@/lib/auth-service";
 import { ApiError } from "@/lib/api";
 import {
   completeOnboardingDraft,
   hasOnboardingDraft,
 } from "@/lib/onboarding-draft";
-import { googleAuthUrl } from "@/lib/google-auth";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -21,6 +19,7 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -48,17 +47,19 @@ export default function SignupPage() {
     }
 
     try {
-      await signup(email, password, "User");
-
-      await login(email, password);
-      await completeOnboardingDraft();
-      router.replace("/dashboard");
+      await signup(email.trim(), password, name.trim() || "User");
+      if (await completeOnboardingDraft()) {
+        router.replace("/dashboard");
+      } else {
+        router.replace("/onboarding");
+      }
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 409) {
           setError("Email already registered.");
         } else {
-          setError("Signup failed.");
+          const detail = err.body?.detail;
+          setError(typeof detail === "string" ? detail : "Could not complete signup.");
         }
       } else {
         setError("Network error.");
@@ -88,8 +89,21 @@ export default function SignupPage() {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm text-slate-500">Email</label>
+            <label className="text-sm text-slate-500" htmlFor="name">Name</label>
             <input
+              id="name"
+              type="text"
+              autoComplete="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-primary-light focus:ring-2 focus:ring-brand-primary-tint outline-none"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm text-slate-500" htmlFor="signup-email">Email</label>
+            <input
+              id="signup-email"
               type="email"
               required
               value={email}
@@ -100,18 +114,22 @@ export default function SignupPage() {
 
           <div className="space-y-2 flex gap-4 ">
             <div>
-              <label className="text-sm text-slate-500">Password</label>
+              <label className="text-sm text-slate-500" htmlFor="signup-password">Password</label>
               <input
+                id="signup-password"
                 type="password"
                 required
+                minLength={8}
+                autoComplete="new-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-brand-primary-light focus:ring-2 focus:ring-brand-primary-tint outline-none"
               />
             </div>
             <div>
-              <label className="text-sm text-slate-500">Confirm Password</label>
+              <label className="text-sm text-slate-500" htmlFor="confirm-password">Confirm Password</label>
               <input
+                id="confirm-password"
                 type="password"
                 required
                 value={confirmPassword}
@@ -125,21 +143,6 @@ export default function SignupPage() {
             {loading ? "Creating..." : "Start Adventure"}
           </Button>
 
-          <div className="flex items-center gap-3" aria-hidden="true">
-            <span className="h-px flex-1 bg-slate-200" />
-            <span className="text-xs font-medium uppercase tracking-[0.16em] text-slate-400">
-              or
-            </span>
-            <span className="h-px flex-1 bg-slate-200" />
-          </div>
-
-          <a
-            href={googleAuthUrl}
-            className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border-2 border-[#FBE0CC] bg-white px-4 py-3 font-semibold text-[#C26120] shadow-sm transition hover:border-[#FF8D48] hover:bg-[#FEF2EA] focus:outline-none focus:ring-2 focus:ring-[#FBBF24] focus:ring-offset-2"
-          >
-            <GoogleIcon className="size-5" />
-            Continue with Google
-          </a>
         </form>
 
         <p className="text-center text-sm text-slate-500">
