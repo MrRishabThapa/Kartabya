@@ -121,6 +121,7 @@ export default function LevelTree({ unit }: Props) {
       {/* Lesson info modal */}
       <LessonModal
         lesson={selectedLesson}
+        unitId={unit.id}
         status={
           selectedLesson
             ? nodesWithStatus.find((n) => n.lesson.id === selectedLesson.id)?.status ?? 'locked'
