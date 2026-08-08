@@ -9,7 +9,7 @@ import { BackendQuestion } from "@/types/backendQuiz";
 
 interface Props {
   data: BackendQuestion;
-  onNext: (correct: boolean) => void;
+  onNext: (correct: boolean, selected: string | null) => void;
 }
 
 export default function QuizQuestion({ data, onNext }: Props) {
@@ -89,7 +89,7 @@ export default function QuizQuestion({ data, onNext }: Props) {
             Check Answer
           </Button>
         ) : (
-          <Button onClick={() => onNext(isCorrect)}>
+          <Button onClick={() => onNext(isCorrect, selected)}>
             Next Question
           </Button>
         )}
