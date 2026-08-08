@@ -1,6 +1,9 @@
 'use client';
 import { Bell, ChevronDown, Search } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { logout } from '@/lib/auth-service';
+import { useUser } from '@/context/UserContext';
 import { UserProfile } from '@/data/dashboard-types';
 
 interface Props {
@@ -9,6 +12,18 @@ interface Props {
 }
 
 export default function TopBar({ user, notificationCount = 0 }: Props) {
+  const router = useRouter();
+  const { setAuthUser } = useUser();
+
+  async function handleLogout() {
+    try {
+      await logout();
+    } finally {
+      setAuthUser(null);
+      router.replace('/auth/login');
+    }
+  }
+
   return (
     <div className="flex items-center gap-3 mb-8">
       {/* Search */}
@@ -49,6 +64,10 @@ export default function TopBar({ user, notificationCount = 0 }: Props) {
 
       {/* Avatar */}
       <button
+        type="button"
+        onClick={handleLogout}
+        title="Sign out"
+        aria-label="Sign out"
         className="flex items-center gap-2 p-1.5 pr-3 rounded-2xl
                    bg-white border border-slate-200
                    hover:border-slate-300 transition-colors"
