@@ -7,8 +7,8 @@ import Button from "@/components/shared/Button";
 import { saveOnboardingDraft } from "@/lib/onboarding-draft";
 import { OnboardingScreenProps } from "@/types/onboarding";
 
-const GRADES = ["Class 11", "Class 12", "Engineering", "Medical"];
-const SUBJECTS = ["Physics", "Math", "Computer Science", "Biology"];
+const GRADES = ["Class 11", "Class 12"];
+const SUBJECTS = ["Physics", "Computer Science",];
 
 export default function Screen6({
   data,
