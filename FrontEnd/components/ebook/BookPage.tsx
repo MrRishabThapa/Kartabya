@@ -1,5 +1,5 @@
 "use client";
-import ReactMarkdown from 'react-markdown';
+import MarkdownContent from './MarkdownContent';
 
 interface Props {
   page: {
@@ -22,8 +22,10 @@ export default function BookPage({
       className="
         h-full
         relative
-        px-10
-        py-12
+        px-6
+        py-8
+        sm:px-10
+        sm:py-10
         text-slate-800
         bg-gradient-to-br
         from-white
@@ -38,7 +40,7 @@ export default function BookPage({
       </div>
 
       {/* Content */}
-      <div className="select-text cursor-text">
+      <div className="mx-auto w-full max-w-[78ch] select-text cursor-text">
 
         {page.type === "text" && (
           <p className="text-lg leading-9 text-slate-700">
@@ -46,7 +48,7 @@ export default function BookPage({
           </p>
         )}
 
-        {page.type === "markdown" && <div className="markdown-lesson-content"><ReactMarkdown>{page.content ?? ''}</ReactMarkdown></div>}
+        {page.type === "markdown" && <MarkdownContent markdown={page.content ?? ''} />}
 
         {page.type === "image" && (
           <div className="space-y-6">
