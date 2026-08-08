@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { ApiError } from '@/lib/api';
 import { createChatSession, getChatSession, listChatSessions, sendChatMessage, type ChatMessage } from '@/lib/chat-api';
 import { getSupportedRecordingMimeType, realtimeSocketUrl, transcribeRecordedAudio } from '@/lib/stt-api';
-import MarkdownContent from '@/components/ebook/MarkdownContent';
+import LessonVisualRenderer from '@/components/lesson/lesson-visual-renderer';
 
 function timestamp() {
   return Date.now();
@@ -351,7 +351,7 @@ export default function LessonTutor({ lessonId, lessonTitle, selectedText, onCle
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`max-w-[90%] rounded-2xl px-3 py-2 text-xs leading-5 ${message.role === 'user' ? 'rounded-br-md bg-brand-primary text-white' : 'rounded-bl-md bg-slate-100 text-slate-700'}`}>
-              {message.role === 'assistant' ? <MarkdownContent markdown={message.content} /> : message.content}
+              {message.role === 'assistant' ? <LessonVisualRenderer markdown={message.content} visuals={message.visuals ?? []} /> : message.content}
             </div>
           </div>
         ))}
