@@ -31,6 +31,11 @@ The backend stores a preferred name, grade, subject, completion timestamp,
 companion nickname, and selected hobbies. Saving is idempotent: resubmitting
 onboarding updates the profile and replaces the user's hobby links.
 
+Onboarding completion is tracked explicitly on the user account through
+`users.is_onboarded`. The flag is set when `POST /api/v1/onboard` succeeds and
+is exposed through `GET /api/v1/auth/me`, so the frontend can route users to
+onboarding without probing the onboarding endpoint for a 404.
+
 ## Local configuration
 
 Keep `.env` out of version control:
