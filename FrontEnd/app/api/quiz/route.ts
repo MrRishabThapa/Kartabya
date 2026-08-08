@@ -1,23 +1,16 @@
 import { NextResponse } from "next/server";
+import { apiFetch } from "@/lib/api";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const cookie = req.headers.get("cookie");
 
-    const upstream = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/v1/quiz`,
-      {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "ngrok-skip-browser-warning": "true",
-          ...(cookie ? { Cookie: cookie } : {}),
-        },
-        body: JSON.stringify(body),
-      }
-    );
+    const upstream = await apiFetch("/v1/quiz", {
+      method: "POST",
+      headers: cookie ? { Cookie: cookie } : undefined,
+      body: JSON.stringify(body),
+    });
 
     const text = await upstream.text();
 
