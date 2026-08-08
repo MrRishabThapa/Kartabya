@@ -1,17 +1,20 @@
 'use client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, Award, BookOpen, PlayCircle, FileText, HelpCircle, Lock } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { Lesson, LessonStatus } from '@/types/lessons-types';
 import DuolingoButton from '@/components/shared/Button';
 
 interface Props {
   lesson: Lesson | null;
+  unitId: string;
   status: LessonStatus;
   unitColor: string;
   onClose: () => void;
 }
 
-export default function LessonModal({ lesson, status, unitColor, onClose }: Props) {
+export default function LessonModal({ lesson, unitId, status, unitColor, onClose }: Props) {
+  const router = useRouter();
   if (!lesson) return null;
 
   const isLocked = status === 'locked';
@@ -127,7 +130,7 @@ export default function LessonModal({ lesson, status, unitColor, onClose }: Prop
                 <div className="mt-6 space-y-2">
                   <DuolingoButton
                     variant="primary"
-                    onClick={() => console.log('Start lesson', lesson.id)}
+                    onClick={() => router.push(`/learn/computer-science/${unitId}/lesson/${lesson.id}`)}
                     className="!w-full !px-4"
                   >
                     {isCompleted ? 'Review Lesson' : 'Start Lesson'}
