@@ -17,12 +17,30 @@ Authentication endpoints:
 - `POST /api/v1/auth/refresh` — extend a valid session
 - `POST /api/v1/auth/logout` — revoke the current session
 
+## Personalized quizzes
+
+Quizzes are generated with OpenAI around the chapter or topic the student is
+reading, personalized with the hobbies collected during onboarding. All quiz
+endpoints require the session cookie.
+
+- `POST /v1/quiz` — generate and persist a quiz; the topic is required
+  (`content`), while subject and hobbies are taken from the user's profile
+  when not provided
+- `GET /v1/quiz` — list the user's generated quizzes, newest first
+- `GET /v1/quiz/{id}` — fetch one quiz with all questions
+- `POST /v1/quiz/{id}/attempt` — grade and persist an attempt (`{score, total}`)
+
+The response matches the frontend `BackendQuiz` contract
+(`type`, `number_of_qns`, `questions` with lettered options and explanations).
+Set `OPEN_AI_KEY` (and optionally `OPENAI_MODEL`) to enable generation.
+
 ## Project structure
 
 ```text
 app/
 ├── api/routes.py       # Health and general API routes
 ├── api/onboarding.py   # Authenticated onboarding persistence
+├── quiz/               # Personalized quiz generation and grading
 ├── auth/local.py       # Email/password and session endpoints
 ├── auth/security.py    # Argon2 and session-token helpers
 ├── auth/service.py     # User and session database operations
