@@ -1,4 +1,23 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+if (!API_URL) {
+  throw new Error("NEXT_PUBLIC_API_URL is not configured");
+}
+
+export function apiFetch(path: string, options: RequestInit = {}) {
+  const headers = new Headers(options.headers);
+
+  headers.set("ngrok-skip-browser-warning", "true");
+  if (!headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  return fetch(`${API_URL}${path}`, {
+    ...options,
+    credentials: "include",
+    headers,
+  });
+}
 
 export class ApiError extends Error {
   status: number;
@@ -32,14 +51,7 @@ export type ApiOnboarding = {
 };
 
 async function request(path: string, options: RequestInit = {}, retry = true) {
-  const res = await fetch(`${API_URL}${path}`, {
-    ...options,
-    credentials: "include", 
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-  });
+  const res = await apiFetch(path, options);
 
   const isJson = res.headers.get("content-type")?.includes("application/json");
   const body = isJson ? await res.json() : await res.text();
