@@ -1,6 +1,4 @@
-import { apiFetch } from "./api";
-
-const QUIZ_API_KEY = process.env.NEXT_PUBLIC_QUIZ_API_KEY!;
+import { api } from "./api";
 
 export interface Option {
   option: "A" | "B" | "C" | "D";
@@ -16,9 +14,16 @@ export interface Question {
 }
 
 export interface BackendQuiz {
+  id: string;
   type: string;
   number_of_qns: number;
   questions: Question[];
+}
+
+export interface QuizAttempt {
+  attempt_id: string;
+  score: number;
+  total: number;
 }
 
 export async function generateQuiz(params: {
@@ -28,21 +33,12 @@ export async function generateQuiz(params: {
   subject: string;
   content: string;
 }): Promise<BackendQuiz> {
+  return api.post("/v1/quiz", params);
+}
 
-  const res = await apiFetch("/v1/quiz", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-Key": QUIZ_API_KEY,
-    },
-    body: JSON.stringify(params),
-  });
-
-  const body = await res.json();
-
-  if (!res.ok) {
-    throw new Error(body.detail || "Quiz generation failed");
-  }
-
-  return body;
+export function submitQuizAttempt(
+  quizId: string,
+  answers: Array<{ number: number; selected: string | null }>,
+): Promise<QuizAttempt> {
+  return api.post(`/v1/quiz/${quizId}/attempt`, { answers });
 }
