@@ -9,6 +9,7 @@ interface Props {
   isDimmed: boolean;
   onHover: (id: string | null) => void;
   onClick: (id: string) => void;
+  isLocked?: boolean;
 }
 
 export default function DistrictOverlay({
@@ -18,17 +19,18 @@ export default function DistrictOverlay({
   isDimmed,
   onHover,
   onClick,
+  isLocked = false,
 }: Props) {
-  const active = isHovered || isSelected;
+  const active = !isLocked && (isHovered || isSelected);
 
   return (
     <g
-      style={{ cursor: 'pointer', pointerEvents: 'auto' }}
-      onMouseEnter={() => onHover(district.id)}
-      onMouseLeave={() => onHover(null)}
+      style={{ cursor: isLocked ? 'not-allowed' : 'pointer', pointerEvents: 'auto' }}
+      onMouseEnter={() => { if (!isLocked) onHover(district.id); }}
+      onMouseLeave={() => { if (!isLocked) onHover(null); }}
       onClick={(e) => {
         e.stopPropagation();
-        onClick(district.id);
+        if (!isLocked) onClick(district.id);
       }}
     >
       {/* Invisible hit area */}
@@ -45,9 +47,10 @@ export default function DistrictOverlay({
         stroke={district.color}
         strokeWidth="0.4"
         strokeLinejoin="round"
+        strokeDasharray={undefined}
         initial={false}
         animate={{
-          opacity: active ? 0.22 : isDimmed ? 0 : 0,
+          opacity: isLocked ? 0 : active ? 0.22 : isDimmed ? 0 : 0,
           filter: active
             ? `drop-shadow(0 0 1.2px ${district.color}) drop-shadow(0 0 2.5px ${district.color})`
             : 'none',
