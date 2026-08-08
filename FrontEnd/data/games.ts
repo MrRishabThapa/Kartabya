@@ -12,7 +12,7 @@ export const GAMES: Game[] = [
     gradient: 'from-orange-400 via-orange-500 to-red-500',
     graphic: '🎯',
     stat: { label: 'players', value: '12k' },
-    status: 'coming-soon',
+    status: 'available',
     difficulty: 'all-levels',
     estimatedMinutes: 2,
     xpReward: 50,
