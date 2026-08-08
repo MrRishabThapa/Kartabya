@@ -2,12 +2,14 @@
 
 import BookPage from "./BookPage";
 import { useEffect, useRef } from "react";
+import type { LessonVisual } from "@/lib/content-api";
 
 interface BookPageData {
   type: "text" | "markdown" | "image";
   content?: string;
   image_url?: string;
   caption?: string;
+  visuals?: LessonVisual[];
 }
 
 interface BookData {
