@@ -1,19 +1,29 @@
 'use client';
-import { Bell, ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, LogOut, Search } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { logout } from '@/lib/auth-service';
 import { useUser } from '@/context/UserContext';
 import { UserProfile } from '@/data/dashboard-types';
 
 interface Props {
   user: UserProfile;
-  notificationCount?: number;
 }
 
-export default function TopBar({ user, notificationCount = 0 }: Props) {
+export default function TopBar({ user }: Props) {
   const router = useRouter();
   const { setAuthUser } = useUser();
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function closeProfile(event: MouseEvent) {
+      if (!profileRef.current?.contains(event.target as Node)) setProfileOpen(false);
+    }
+    document.addEventListener('mousedown', closeProfile);
+    return () => document.removeEventListener('mousedown', closeProfile);
+  }, []);
 
   async function handleLogout() {
     try {
@@ -44,46 +54,45 @@ export default function TopBar({ user, notificationCount = 0 }: Props) {
         />
       </div>
 
-      {/* Notifications */}
-      <button
-        className="relative w-11 h-11 rounded-2xl bg-white border border-slate-200
-                   flex items-center justify-center text-slate-500
-                   hover:text-slate-700 hover:border-slate-300 transition-colors"
-        aria-label="Notifications"
-      >
-        <Bell size={18} strokeWidth={2} />
-        {notificationCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1
-                           rounded-full bg-red-500 border-2 border-white
-                           flex items-center justify-center
-                           text-[10px] font-bold text-white">
-            {notificationCount}
-          </span>
-        )}
-      </button>
-
       {/* Avatar */}
-      <button
-        type="button"
-        onClick={handleLogout}
-        title="Sign out"
-        aria-label="Sign out"
-        className="flex items-center gap-2 p-1.5 pr-3 rounded-2xl
-                   bg-white border border-slate-200
-                   hover:border-slate-300 transition-colors"
-      >
-        <div className="w-8 h-8 rounded-lg bg-slate-100 overflow-hidden
-                        flex items-center justify-center">
-          {user.avatarUrl ? (
-            <Image src={user.avatarUrl} alt={user.name} width={32} height={32} />
-          ) : (
-            <span className="text-sm font-bold text-slate-500">
-              {user.name.charAt(0)}
-            </span>
-          )}
-        </div>
-        <ChevronDown size={14} className="text-slate-400" strokeWidth={2} />
-      </button>
+      <div ref={profileRef} className="relative">
+        <button
+          type="button"
+          onClick={() => setProfileOpen((open) => !open)}
+          aria-expanded={profileOpen}
+          aria-haspopup="menu"
+          aria-label="Open profile menu"
+          className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-1.5 pr-3
+                     transition-colors hover:border-slate-300"
+        >
+          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-slate-100">
+            {user.avatarUrl ? (
+              <Image src={user.avatarUrl} alt={user.name} width={32} height={32} />
+            ) : (
+              <span className="text-sm font-bold text-slate-500">{user.name.charAt(0)}</span>
+            )}
+          </div>
+          <ChevronDown size={14} className={`text-slate-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
+        </button>
+
+        {profileOpen && (
+          <div role="menu" className="absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+            <div className="border-b border-slate-100 px-3 py-2">
+              <p className="truncate text-sm font-bold text-slate-800">{user.name}</p>
+              <p className="text-xs text-slate-400">Account</p>
+            </div>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={handleLogout}
+              className="mt-1 flex min-h-10 w-full items-center gap-2 rounded-lg px-3 text-sm font-semibold text-slate-600 transition-colors hover:bg-brand-primary-bg hover:text-brand-primary"
+            >
+              <LogOut size={16} />
+              Log out
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
