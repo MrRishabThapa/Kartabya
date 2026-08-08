@@ -5,7 +5,7 @@ import { api, ApiError } from "@/lib/api";
 import BookViewer from "./BookViewer";
 import BookSkeleton from "./BookSkeletonLoader";
 import ErrorState from "@/components/shared/ErrorState";
-import { getPersonalizedLesson, personalizeLesson, resolveContentContext, savePersonalizedProgress, type ContentLesson } from '@/lib/content-api';
+import { getPersonalizedLesson, personalizeLesson, resolveContentContext, savePersonalizedProgress, type ContentLesson, type LessonVisual } from '@/lib/content-api';
 
 interface Props {
   topic?: string;
@@ -17,12 +17,13 @@ interface Props {
 
 interface ViewerBook {
   title: string;
-  pages: Array<{ type: 'text' | 'markdown' | 'image'; content?: string; image_url?: string; caption?: string }>;
+  pages: Array<{ type: 'text' | 'markdown' | 'image'; content?: string; image_url?: string; caption?: string; visuals?: LessonVisual[] }>;
   personalizedLessonId?: string;
   resumePosition?: number;
 }
 
-function markdownPages(markdown: string): Array<{ type: 'markdown'; content: string }> {
+function markdownPages(markdown: string, visuals: LessonVisual[] = []): Array<{ type: 'markdown'; content: string; visuals?: LessonVisual[] }> {
+  if (visuals.length || markdown.includes('[visual]')) return [{ type: 'markdown', content: markdown, visuals }];
   const chunks = markdown.split(/\n(?=# )/g).filter(Boolean);
   return (chunks.length ? chunks : [markdown]).map((content) => ({ type: 'markdown', content }));
 }
@@ -70,7 +71,7 @@ export default function EBookContainer({ topic = "arrays", bookTitle, lessonId, 
           if (!(personalizedError instanceof ApiError) || personalizedError.status !== 404) throw personalizedError;
           personalizedLesson = await personalizeLesson(resolvedLessonId);
         }
-        setBook({ title: personalizedLesson.lesson_title, pages: markdownPages(personalizedLesson.markdown), personalizedLessonId: personalizedLesson.id, resumePosition: personalizedLesson.resume_position });
+        setBook({ title: personalizedLesson.lesson_title, pages: markdownPages(personalizedLesson.markdown, personalizedLesson.visuals ?? []), personalizedLessonId: personalizedLesson.id, resumePosition: personalizedLesson.resume_position });
         return;
       } else {
         response = await api.get(`/book?topic=${encodeURIComponent(topic)}`) as { data: ViewerBook };
