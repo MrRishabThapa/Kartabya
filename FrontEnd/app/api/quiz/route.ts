@@ -8,8 +8,10 @@ export async function POST(req: Request) {
       `${process.env.NEXT_PUBLIC_API_URL}/v1/quiz`,
       {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "true",
           "X-API-Key": process.env.QUIZ_API_KEY!,
         },
         body: JSON.stringify(body),
