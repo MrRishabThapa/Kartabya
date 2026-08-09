@@ -9,11 +9,14 @@ import {
   Check,
   LayoutGrid,
   Loader2,
+  Play,
   Maximize2,
   Minimize2,
   Mic,
+  Sparkles,
   Pencil,
   Plus,
+  Pause,
   Square,
   StickyNote,
   Trash2,
@@ -34,6 +37,7 @@ import {
   getSupportedRecordingMimeType,
   transcribeRecordedAudio,
 } from "@/lib/stt-api";
+import { useStudyTracker } from "@/hooks/useStudyTracker";
 
 interface StickyNoteItem {
   id: string;
@@ -134,6 +138,30 @@ function getNoteDimensions(text: string) {
     width: 158 + growth * 15,
     height: 116 + growth * 15,
   };
+}
+
+function formatStudyDuration(seconds: number) {
+  const hours = Math.floor(seconds / 3600).toString().padStart(2, "0");
+  const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
+  const remaining = Math.floor(seconds % 60).toString().padStart(2, "0");
+  return `${hours}:${minutes}:${remaining}`;
+}
+
+function StudyTrackerControls({ lessonId, subject, title }: { lessonId: string; subject: string; title: string }) {
+  const tracker = useStudyTracker({ lessonId, subject, title });
+  const active = tracker.session?.status === "ACTIVE";
+  const paused = tracker.session?.status === "PAUSED";
+  const finished = tracker.session?.status === "COMPLETED" || tracker.session?.status === "CANCELLED";
+
+  return (
+    <div className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1 sm:flex" title="Server-tracked study time">
+      <span className="font-mono text-xs font-bold tabular-nums text-slate-700">{formatStudyDuration(tracker.elapsedSeconds)}</span>
+      {!finished && active && <button type="button" onClick={() => void tracker.pause()} disabled={tracker.action !== null} className="rounded-lg p-1.5 text-slate-500 hover:bg-white hover:text-slate-800 disabled:opacity-50" aria-label="Pause study timer"><Pause size={14} /></button>}
+      {!finished && paused && <button type="button" onClick={() => void tracker.resume()} disabled={tracker.action !== null} className="rounded-lg p-1.5 text-brand-primary hover:bg-white disabled:opacity-50" aria-label="Resume study timer"><Play size={14} /></button>}
+      {!finished && <button type="button" onClick={() => void tracker.stop()} disabled={tracker.action !== null} className="rounded-lg p-1.5 text-slate-500 hover:bg-white hover:text-red-600 disabled:opacity-50" aria-label="Finish study session"><Square size={13} /></button>}
+      {tracker.error && <button type="button" onClick={() => void tracker.retry()} className="text-[10px] font-bold text-red-500 hover:text-red-700" title={tracker.error}>Retry</button>}
+    </div>
+  );
 }
 
 function constrainNotePosition(note: StickyNoteItem, index: number): StickyNoteItem {
@@ -1220,6 +1248,15 @@ export default function LessonWorkspace({
             Lesson {unitIndex + 1} · {unit.title}
           </p>
         </div>
+        <StudyTrackerControls lessonId={lesson.id} subject={unit.courseTitle} title={lesson.title} />
+        {completed && (
+          <Link
+            href={`/games/teach/play?lesson_id=${encodeURIComponent(contentContext?.lesson.id ?? lesson.id)}&topic_title=${encodeURIComponent(lesson.title)}&subject=${encodeURIComponent(unit.courseTitle)}`}
+            className="inline-flex min-h-10 shrink-0 items-center gap-2 rounded-xl border border-brand-primary-tint bg-brand-primary-bg px-3 text-xs font-extrabold text-brand-primary transition-colors hover:bg-brand-primary-tint"
+          >
+            <Sparkles size={15} /> <span className="hidden sm:inline">Teach it to me</span><span className="sm:hidden">Teach</span>
+          </Link>
+        )}
         <button
           type="button"
           onClick={() => void toggleCompleted()}
