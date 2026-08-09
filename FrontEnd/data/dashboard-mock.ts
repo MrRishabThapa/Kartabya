@@ -46,16 +46,6 @@ export const MOCK_ACTIVITIES: Activity[] = [
     illustration: '',
     size: 'small',
   },
-  {
-    id: 'practice',
-    title: 'Practice Zone',
-    subtitle: 'Sharpen your skills with hands-on exercises',
-    ctaLabel: 'Start Practicing',
-    route: '/dashboard/practice',
-    accentColor: '#0891B2',
-    illustration: '',
-    size: 'wide',
-  },
 ];
 
 // ═══════════════════════════════════════════════════════════
