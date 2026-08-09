@@ -1,0 +1,3 @@
+export default function Dartboard({ wobble = false }: { wobble?: boolean }) {
+  return <svg viewBox="0 0 180 180" className={`h-36 w-36 sm:h-44 sm:w-44 ${wobble ? 'animate-[bounce_0.35s_ease-in-out]' : ''}`} role="img" aria-label="Dartboard"><circle cx="90" cy="90" r="82" fill="#f7d6b8" stroke="#d66b32" strokeWidth="5" /><circle cx="90" cy="90" r="62" fill="#fff6e9" stroke="#d66b32" strokeWidth="5" /><circle cx="90" cy="90" r="40" fill="#f3a35b" stroke="#d66b32" strokeWidth="5" /><circle cx="90" cy="90" r="20" fill="#fff6e9" stroke="#d66b32" strokeWidth="5" /><circle cx="90" cy="90" r="8" fill="#e85d2a" /></svg>;
+}
