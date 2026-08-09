@@ -1,1 +1,0 @@
-"""Kartabya backend application package."""
