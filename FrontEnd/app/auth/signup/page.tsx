@@ -5,19 +5,18 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import LottieLoader from "@/components/shared/LottieLoader";
 import Button from "@/components/shared/Button";
-import { signup, login } from "@/lib/auth-service";
+import { signup } from "@/lib/auth-service";
 import { ApiError } from "@/lib/api";
 import {
   completeOnboardingDraft,
   hasOnboardingDraft,
 } from "@/lib/onboarding-draft";
+import { toast } from "sonner";
 
 export default function SignupPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
@@ -38,10 +37,8 @@ export default function SignupPage() {
     }
 
     setLoading(true);
-    setError(null);
-
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      toast.error("Passwords do not match.");
       setLoading(false);
       return;
     }
@@ -56,13 +53,14 @@ export default function SignupPage() {
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 409) {
-          setError("Email already registered.");
+          toast.error("Email already registered.");
         } else {
           const detail = err.body?.detail;
-          setError(typeof detail === "string" ? detail : "Could not complete signup.");
+          const message = typeof detail === "string" ? detail : detail?.message ?? "Could not complete signup.";
+          toast.error(message);
         }
       } else {
-        setError("Network error.");
+        toast.error("Network error.");
       }
     } finally {
       setLoading(false);
@@ -84,10 +82,6 @@ export default function SignupPage() {
         </div>
 
         <form onSubmit={handleSignup} className="space-y-6">
-          {error && (
-            <div className="text-sm text-red-500 text-center">{error}</div>
-          )}
-
           <div className="space-y-2">
             <label className="text-sm text-slate-500" htmlFor="name">Name</label>
             <input
