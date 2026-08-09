@@ -5,28 +5,61 @@ import { ArrowLeft, Flame, Sparkles, Target, Trophy, Users, Zap } from 'lucide-r
 import { useRouter } from 'next/navigation';
 import { LeaderboardData } from '@/data/leaderboard-types';
 import { computeRankings } from '@/lib/leaderboard-utils';
-import { getEarnedXp } from '@/lib/xp';
+import { getXpLeaderboard } from '@/lib/xp-service';
+import { useUser } from '@/context/UserContext';
+import { toast } from 'sonner';
 import LeaderboardPodium from './LeaderboardPodium';
 import LeaderboardRow from './LeaderboardRow';
 
 interface Props {
-  data: LeaderboardData;
+  data?: LeaderboardData;
 }
 
-export default function Leaderboard({ data }: Props) {
-  const router = useRouter();
+const defaultData: LeaderboardData = {
+  title: 'Leaderboard',
+  subtitle: 'Global XP rankings',
+  period: 'all-time',
+  scope: 'global',
+  entries: [],
+};
 
-  // 🎯 Compute ranks dynamically from scores
-  const [earnedXp, setEarnedXp] = useState(0);
+export default function Leaderboard({ data: initialData = defaultData }: Props) {
+  const router = useRouter();
+  const { authUser } = useUser();
+  const [data, setData] = useState(initialData);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const sync = () => setEarnedXp(getEarnedXp());
-    sync();
-    window.addEventListener('adaptiv:xp-updated', sync);
-    return () => window.removeEventListener('adaptiv:xp-updated', sync);
-  }, []);
+    const timer = window.setTimeout(() => {
+      void getXpLeaderboard(50)
+        .then((response) => {
+          const entries = response.entries.map((entry) => ({
+            id: entry.user_id,
+            name: entry.name,
+            avatarUrl: entry.avatar_url ?? undefined,
+            score: entry.total_xp,
+            scoreUnit: 'XP',
+            isCurrentUser: entry.user_id === authUser?.id,
+          }));
+          if (authUser && !entries.some((entry) => entry.isCurrentUser)) {
+            entries.push({
+              id: authUser.id,
+              name: authUser.name ?? authUser.email,
+              avatarUrl: authUser.avatar_url ?? undefined,
+              score: response.current_user_xp,
+              scoreUnit: 'XP',
+              isCurrentUser: true,
+            });
+          }
+          setData({ ...defaultData, entries });
+        })
+        .catch(() => toast.error('Could not load the leaderboard.'))
+        .finally(() => setLoading(false));
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [authUser]);
 
-  const rankedEntries = useMemo(() => computeRankings(data.entries.map((entry) => entry.isCurrentUser ? { ...entry, score: entry.score + earnedXp } : entry)), [data.entries, earnedXp]);
+  const rankedEntries = useMemo(() => computeRankings(data.entries), [data.entries]);
 
   const podiumEntries = rankedEntries.filter((e) => e.rank <= 3);
   const listEntries = rankedEntries.filter((e) => e.rank > 3);
@@ -93,7 +126,7 @@ export default function Leaderboard({ data }: Props) {
             </div>
           </div>
           <div className="space-y-2">
-            {listEntries.map((entry, i) => (
+            {loading ? <p className="py-8 text-center text-sm font-semibold text-slate-400">Loading rankings…</p> : listEntries.map((entry, i) => (
               <LeaderboardRow key={entry.id} entry={entry} index={i} />
             ))}
           </div>
