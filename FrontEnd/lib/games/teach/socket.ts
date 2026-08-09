@@ -58,7 +58,7 @@ export class TeachSocket {
     };
     socket.addEventListener('open', () => {
       if (this.closed) {
-        socket.close(1000, 'cancelled before use');
+        this.endSession(socket, 'socket cancelled before use', 1000, 'cancelled before use');
         return;
       }
       this.handlers.open?.();
@@ -88,7 +88,12 @@ export class TeachSocket {
   close(code = 1000, reason = 'client leaving') {
     if (this.closed) return;
     this.closed = true;
-    if (this.socket?.readyState === WebSocket.OPEN) this.socket.close(code, reason);
+    if (this.socket?.readyState === WebSocket.OPEN) this.endSession(this.socket, 'TeachSocket.close', code, reason);
     this.socket = null;
+  }
+
+  private endSession(socket: WebSocket, source: string, code: number, reason: string) {
+    console.trace(`🦊 endSession called from: ${source}, reason: ${reason}`);
+    socket.close(code, reason);
   }
 }

@@ -29,15 +29,30 @@ function isQnaCompleteCue(text: string) {
   return normalized.includes("that's everything") || normalized.includes('that is everything') || normalized.includes('thank you for teaching me') || normalized.includes('no more questions') || normalized.includes('done asking');
 }
 
+function friendlyError(raw: string) {
+  if (/missing required parameter/i.test(raw)) return 'Teaching service is temporarily unavailable. Please try again in a moment.';
+  if (/rate limit/i.test(raw)) return 'Too many sessions right now. Please wait a moment and try again.';
+  if (/timeout/i.test(raw)) return 'Connection timed out. Check your internet and try again.';
+  if (/authentication|unauthorized|invalid ticket|expired/i.test(raw)) return 'Session expired. Please start a new teaching session.';
+  return raw;
+}
+
+function isRetryableError(raw: string) {
+  return /missing required parameter|rate limit|timeout|authentication|unauthorized|invalid ticket|expired/i.test(raw);
+}
+
 export function useTeachSession() {
   const [phase, setPhaseState] = useState<TeachConnectionPhase>('idle');
   const [messages, setMessages] = useState<TeachMessage[]>([]);
   const [result, setResult] = useState<TeachResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
+  const [rawError, setRawError] = useState<string | null>(null);
+  const [retryCountdown, setRetryCountdown] = useState<number | null>(null);
   const [historyNotice, setHistoryNotice] = useState(false);
   const [chatSessionId, setChatSessionId] = useState<string | null>(null);
   const [isAnswering, setIsAnswering] = useState(false);
   const [qnaExchangeCount, setQnaExchangeCount] = useState(0);
+  const [qnaQuestionCount, setQnaQuestionCount] = useState(0);
   const [qnaReady, setQnaReady] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [commitNotice, setCommitNotice] = useState(false);
@@ -57,6 +72,9 @@ export function useTeachSession() {
   const commitTimerRef = useRef<number | null>(null);
   const connectGenerationRef = useRef(0);
   const activeLessonRef = useRef<string | null>(null);
+  const lastLessonRef = useRef<string | null>(null);
+  const autoRetryAttemptRef = useRef(0);
+  const connectRef = useRef<(lessonId: string, preserveAutoRetry?: boolean) => void>(() => undefined);
 
   const debug = process.env.NEXT_PUBLIC_DEBUG_TEACH === 'true';
   const setPhase = useCallback((next: TeachConnectionPhase) => {
@@ -67,6 +85,29 @@ export function useTeachSession() {
     }
     phaseRef.current = next;
     setPhaseState(next);
+  }, [debug]);
+
+  const endSession = useCallback((source: string, reason: string) => {
+    console.trace(`🦊 endSession called from: ${source}, reason: ${reason}`);
+    socketRef.current?.close(1000, reason);
+    socketRef.current = null;
+  }, []);
+
+  const setTeachError = useCallback((raw: string, payload?: unknown) => {
+    const trimmed = (raw ?? '').trim();
+    if (!trimmed) {
+      if (debug) console.log('🦊 setTeachError: ignoring empty payload', payload);
+      return;
+    }
+    const friendly = friendlyError(trimmed);
+    console.error('🦊 teach error:', { raw: trimmed, friendly, payload });
+    setRawError(trimmed);
+    setErrorDetail(friendly);
+    void playbackRef.current.stop();
+    if (isRetryableError(trimmed) && autoRetryAttemptRef.current === 0) {
+      autoRetryAttemptRef.current = 1;
+      setRetryCountdown(3);
+    }
   }, [debug]);
 
   const sendSocket = useCallback((socket: TeachSocket, payload: object) => {
@@ -89,13 +130,16 @@ export function useTeachSession() {
     const normalized = normalizeGrade(grade);
     gradeRef.current = normalized;
     activeLessonRef.current = null;
+    void playbackRef.current.stop();
     setResult(normalized);
     setHistoryNotice(fromHistory);
     setPhase('result');
   }, [setPhase]);
 
-  const connect = useCallback(async (lessonId: string) => {
+  const connect = useCallback(async (lessonId: string, preserveAutoRetry = false) => {
     if (activeLessonRef.current === lessonId) return;
+    lastLessonRef.current = lessonId;
+    if (!preserveAutoRetry) autoRetryAttemptRef.current = 0;
     activeLessonRef.current = lessonId;
     const generation = ++connectGenerationRef.current;
     leavingRef.current = false;
@@ -104,13 +148,15 @@ export function useTeachSession() {
     streamingUserIdRef.current = null;
     lastUserTextRef.current = null;
     lastCompanionTextRef.current = null;
-    socketRef.current?.close();
-    socketRef.current = null;
-    setError(null);
+    if (socketRef.current) endSession('new session connection', 'component unmount');
+    setErrorDetail(null);
+    setRawError(null);
+    setRetryCountdown(null);
     setHistoryNotice(false);
     setResult(null);
     setMessages([]);
     setQnaExchangeCount(0);
+    setQnaQuestionCount(0);
     setQnaReady(false);
     setCommitNotice(false);
     setRecordingSeconds(0);
@@ -136,14 +182,14 @@ export function useTeachSession() {
             setRecordingSeconds(0);
             setPhase('explaining');
           } catch {
-            setError('Microphone permission is required to teach your companion.');
+            setTeachError('Microphone permission is required to teach your companion.', {});
             setPhase('failed');
           }
         },
         message: (payload) => {
           const type = typeof payload.type === 'string' ? payload.type : '';
           const canonical = normalizeTeachEventType(type);
-          if (debug) console.log('🦊 WS RECV:', type, '→', canonical, payload);
+          if (debug) console.log('🦊 WS RECV:', type, '→ canonical:', canonical, 'payload:', payload);
 
           if (canonical === 'ai_audio_delta') {
             const audio = typeof payload.delta === 'string' ? payload.delta : typeof payload.audio === 'string' ? payload.audio : '';
@@ -154,6 +200,7 @@ export function useTeachSession() {
 
           if (canonical === 'ai_response_done') {
             // This ends one AI response, never the teaching session.
+            streamingCompanionIdRef.current = null;
             return;
           }
 
@@ -173,9 +220,13 @@ export function useTeachSession() {
           if (canonical === 'user_text_done') {
             const text = typeof payload.transcript === 'string' ? payload.transcript.trim() : typeof payload.text === 'string' ? payload.text.trim() : '';
             if (text) {
-              const hadStreamingBubble = Boolean(streamingUserIdRef.current);
-              if (!hadStreamingBubble && lastUserTextRef.current === text) return;
               setMessages((current) => {
+                const last = current[current.length - 1];
+                if (last?.sender === 'user' && last.text.trim() === text) {
+                  console.log('🦊 Dropped duplicate user bubble');
+                  streamingUserIdRef.current = null;
+                  return current;
+                }
                 const id = streamingUserIdRef.current ?? `user-${Date.now()}`;
                 streamingUserIdRef.current = null;
                 const index = current.findIndex((message) => message.id === id);
@@ -204,19 +255,23 @@ export function useTeachSession() {
           }
 
           if (canonical === 'ai_text_done') {
-            const finalText = typeof payload.transcript === 'string' ? payload.transcript.trim() : typeof payload.text === 'string' ? payload.text.trim() : '';
+            const finalText = typeof payload.transcript === 'string' ? payload.transcript : typeof payload.text === 'string' ? payload.text : '';
             const id = streamingCompanionIdRef.current;
             if (id) {
               setMessages((current) => current.map((message) => message.id === id ? { ...message, text: finalText || message.text, streaming: false } : message));
               streamingCompanionIdRef.current = null;
             } else if (finalText) {
-              const previous = lastCompanionTextRef.current;
-              if (!previous || previous.text !== finalText || Date.now() - previous.at > 5000) {
-                setMessages((current) => [...current, { id: `companion-${Date.now()}`, sender: 'companion', text: finalText, streaming: false }]);
-              }
+              setMessages((current) => {
+                const last = current[current.length - 1];
+                if (last?.sender === 'companion' && last.text.trim() === finalText.trim()) return current;
+                return [...current, { id: crypto.randomUUID(), sender: 'companion', text: finalText, streaming: false }];
+              });
             }
             if (finalText) lastCompanionTextRef.current = { text: finalText, at: Date.now() };
             if (phaseRef.current === 'awaiting_qna') setPhase('qna');
+            if (finalText.trim() && (phaseRef.current === 'awaiting_qna' || phaseRef.current === 'qna')) {
+              setQnaQuestionCount((count) => count + 1);
+            }
             if (finalText && isQnaCompleteCue(finalText)) setQnaReady(true);
             return;
           }
@@ -227,49 +282,90 @@ export function useTeachSession() {
             return;
           }
 
-          if (canonical === 'teach.grading_started') { void cleanupAudio(); setPhase('grading'); return; }
           if (canonical === 'teach.grade') { finishWithGrade((payload.data ?? payload) as TeachGrade); return; }
-          if (canonical === 'teach.grade_failed') {
+          if (canonical === 'teach.grade_failed' || canonical === 'grade_failed') {
+            const message =
+              (typeof payload.message === 'string' && payload.message.trim()) ||
+              (typeof payload.detail === 'string' && payload.detail.trim()) ||
+              '';
+            if (!message) {
+              console.log('🦊 ignored empty grade_failed event:', payload);
+              return;
+            }
             console.error('🦊 teach.grade_failed:', payload);
-            setError(typeof payload.message === 'string' ? payload.message : typeof payload.detail === 'string' ? payload.detail : 'Grading failed.');
-            activeLessonRef.current = null;
-            setPhase('failed');
-            return;
-          }
-          if (canonical === 'session_ended' || canonical === 'response_cancelled') {
-            const detail = typeof payload.reason === 'string' ? payload.reason : `${type} received`;
-            console.error('🦊 WS lifecycle event:', type, detail);
-            setError(`Teaching session ended unexpectedly: ${detail}`);
+            setTeachError(message, payload);
             activeLessonRef.current = null;
             setPhase('failed');
             return;
           }
           if (canonical === 'error') {
-            setError(typeof payload.message === 'string' ? payload.message : typeof payload.detail === 'string' ? payload.detail : 'Something went wrong with the teaching session.');
+            const message =
+              (typeof payload.message === 'string' && payload.message.trim()) ||
+              (typeof payload.detail === 'string' && payload.detail.trim()) ||
+              (typeof payload.error === 'string' && payload.error.trim()) ||
+              (typeof payload.error === 'object' && payload.error !== null && 'message' in payload.error && typeof payload.error.message === 'string' ? payload.error.message.trim() : '') ||
+              '';
+            if (!message) {
+              if (debug) console.log('🦊 ignored empty error event:', payload);
+              return;
+            }
+            setTeachError(message, payload);
             activeLessonRef.current = null;
             setPhase('failed');
           }
         },
-        error: () => setError('The teaching session could not connect. Please try again.'),
+        error: () => setTeachError('The teaching session could not connect. Please try again.'),
         close: (event) => {
           void cleanupAudio();
           if (debug) console.log('🦊 WS CLOSED code:', event.code, 'reason:', event.reason);
           if (socketRef.current === socket) socketRef.current = null;
-          activeLessonRef.current = null;
           const clientInitiated = event.code === 1000 && ['component unmount', 'cancelled before use', 'user leaving', 'session complete'].includes(event.reason);
           if (leavingRef.current || clientInitiated || gradeRef.current || phaseRef.current === 'grading' || phaseRef.current === 'result') return;
-          setError(`Connection closed unexpectedly (code ${event.code}). ${event.reason || 'Please try again.'}`);
-          setPhase('failed');
+          if (phaseRef.current === 'explaining' || phaseRef.current === 'awaiting_qna' || phaseRef.current === 'qna') {
+            setTeachError(`Connection closed unexpectedly (code ${event.code})${event.reason ? `: ${event.reason}` : ''}`, event);
+            activeLessonRef.current = null;
+            setPhase('failed');
+          }
         },
       });
       socketRef.current = socket;
       socket.open();
     } catch (caught) {
       activeLessonRef.current = null;
-      setError(caught instanceof ApiError && caught.status === 404 ? 'This teaching lesson could not be found.' : 'Could not start the teaching session.');
+      setTeachError(caught instanceof ApiError && caught.status === 404 ? 'This teaching lesson could not be found.' : 'Could not start the teaching session.', caught);
       setPhase('failed');
     }
-  }, [cleanupAudio, debug, finishWithGrade, sendSocket, setPhase]);
+  }, [cleanupAudio, debug, endSession, finishWithGrade, sendSocket, setPhase, setTeachError]);
+
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
+
+  useEffect(() => {
+    if (retryCountdown === null) return undefined;
+    if (retryCountdown === 0) {
+      const timer = window.setTimeout(() => {
+        setRetryCountdown(null);
+        const lessonId = lastLessonRef.current;
+        if (lessonId) {
+          activeLessonRef.current = null;
+          void connectRef.current(lessonId, true);
+        }
+      }, 0);
+      return () => window.clearTimeout(timer);
+    }
+    const timer = window.setTimeout(() => setRetryCountdown((count) => count === null ? null : count - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [retryCountdown]);
+
+  const retry = useCallback(() => {
+    const lessonId = lastLessonRef.current;
+    if (!lessonId) return;
+    autoRetryAttemptRef.current = 0;
+    setRetryCountdown(null);
+    activeLessonRef.current = null;
+    void connect(lessonId);
+  }, [connect]);
 
   const endExplanation = useCallback(() => {
     if (phaseRef.current !== 'explaining') return;
@@ -304,8 +400,8 @@ export function useTeachSession() {
 
   const endTeaching = useCallback(() => {
     if (debug) console.log('🦊 sendEndTeaching called from:', 'user_click', 'state:', phaseRef.current);
-    if (phaseRef.current !== 'qna' || qnaExchangeCount < 1) {
-      if (debug) console.warn('🦊 BLOCKED: end_teaching only allowed in qna after an answer');
+    if (phaseRef.current !== 'qna') {
+      if (debug) console.warn('🦊 BLOCKED: end_teaching only allowed in qna');
       return;
     }
     const socket = socketRef.current;
@@ -314,18 +410,16 @@ export function useTeachSession() {
     isAnsweringRef.current = false;
     setIsAnswering(false);
     setPhase('grading');
-  }, [debug, qnaExchangeCount, sendSocket, setPhase]);
+  }, [debug, sendSocket, setPhase]);
 
-  const close = useCallback(() => {
+  const close = useCallback((reason: 'component unmount' | 'user leaving' = 'component unmount') => {
     leavingRef.current = true;
     connectGenerationRef.current += 1;
     activeLessonRef.current = null;
     if (commitTimerRef.current !== null) window.clearTimeout(commitTimerRef.current);
-    if (debug) console.trace('🦊 STOP CALLED (WS close only)');
-    socketRef.current?.close(1000, 'component unmount');
-    socketRef.current = null;
+    endSession(reason === 'user leaving' ? 'user navigation' : 'component unmount', reason);
     void cleanupAudio();
-  }, [cleanupAudio, debug]);
+  }, [cleanupAudio, endSession]);
 
   useEffect(() => {
     if (!isAnswering) return undefined;
@@ -336,5 +430,5 @@ export function useTeachSession() {
     return () => window.clearInterval(timer);
   }, [isAnswering]);
 
-  return { phase, messages, result, error, historyNotice, chatSessionId, isRecording: isAnswering, qnaExchangeCount, qnaReady, recordingSeconds, commitNotice, connect, endExplanation, toggleRecording, endTeaching, close };
+  return { phase, messages, result, error: errorDetail, errorDetail, rawError, retryCountdown, historyNotice, chatSessionId, isRecording: isAnswering, qnaExchangeCount, qnaQuestionCount, qnaReady, recordingSeconds, commitNotice, connect, retry, endExplanation, toggleRecording, endTeaching, close };
 }

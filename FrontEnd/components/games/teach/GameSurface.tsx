@@ -58,12 +58,15 @@ export default function GameSurface({ lessonId, topicTitle, subject }: { lessonI
     };
   }, [lessonId]);
 
-  const retry = () => { if (topic) void connect(topic.id); };
-  const goBack = () => router.back();
+  const retry = teach.retry;
+  const goBack = () => {
+    close('user leaving');
+    router.back();
+  };
   const primaryAction = () => {
     if (teach.phase === 'explaining' || teach.phase === 'qna') teach.toggleRecording();
   };
 
   if (loading || !topic) return <main className="flex h-[100dvh] items-center justify-center bg-orange-50"><LoaderCircle className="animate-spin text-brand-primary" aria-label="Loading teaching game" /></main>;
-  return <main className="flex h-[100dvh] w-full flex-col overflow-hidden bg-orange-50"><header className="flex shrink-0 items-center justify-between border-b border-orange-100 bg-white px-4 py-3 sm:px-6"><button type="button" onClick={goBack} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-slate-500 hover:bg-slate-50"><ArrowLeft size={17} /> Back to games</button><div className="text-right"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-primary">{topic.subject}</p><p className="text-sm font-extrabold text-slate-800">Teach Your Companion</p></div></header><div className="flex min-h-0 flex-1 flex-col lg:flex-row"><section className="flex min-h-0 flex-[3] flex-col border-b border-orange-100 lg:border-b-0 lg:border-r"><GameStage topic={topic} phase={teach.phase} result={teach.result} error={teach.error} historyNotice={teach.historyNotice} companionName={companionName} isRecording={teach.isRecording} recordingSeconds={teach.recordingSeconds} commitNotice={teach.commitNotice} qnaReady={teach.qnaReady} qnaExchangeCount={teach.qnaExchangeCount} onMicToggle={primaryAction} onDoneExplaining={teach.endExplanation} onFinishTeaching={teach.endTeaching} onRetry={retry} onAnother={goBack} onBack={goBack} /></section><section className="flex min-h-0 max-h-[38dvh] lg:max-h-none flex-[2]"><ConversationPanel companionName={companionName} messages={teach.messages} qnaReady={teach.qnaReady} phase={teach.phase} /></section></div></main>;
+  return <main className="flex h-[100dvh] w-full flex-col overflow-hidden bg-orange-50"><header className="flex shrink-0 items-center justify-between border-b border-orange-100 bg-white px-4 py-3 sm:px-6"><button type="button" onClick={goBack} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-slate-500 hover:bg-slate-50"><ArrowLeft size={17} /> Back to games</button><div className="text-right"><p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-primary">{topic.subject}</p><p className="text-sm font-extrabold text-slate-800">Teach Your Companion</p></div></header><div className="flex min-h-0 flex-1 flex-col lg:flex-row"><section className="flex min-h-0 flex-[3] flex-col border-b border-orange-100 lg:border-b-0 lg:border-r"><GameStage topic={topic} phase={teach.phase} result={teach.result} error={teach.errorDetail} rawError={teach.rawError} retryCountdown={teach.retryCountdown} historyNotice={teach.historyNotice} companionName={companionName} isRecording={teach.isRecording} recordingSeconds={teach.recordingSeconds} commitNotice={teach.commitNotice} qnaReady={teach.qnaReady} qnaQuestionCount={teach.qnaQuestionCount} onMicToggle={primaryAction} onDoneExplaining={teach.endExplanation} onFinishTeaching={teach.endTeaching} onRetry={retry} onAnother={goBack} onBack={goBack} /></section><section className="flex min-h-0 max-h-[38dvh] lg:max-h-none flex-[2]"><ConversationPanel companionName={companionName} messages={teach.messages} qnaReady={teach.qnaReady} phase={teach.phase} /></section></div></main>;
 }
