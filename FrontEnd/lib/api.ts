@@ -37,6 +37,7 @@ export type ApiUser = {
   avatar_url: string | null;
   email_verified: boolean;
   is_onboarded: boolean;
+  total_xp?: number;
 };
 
 export type ApiOnboarding = {
