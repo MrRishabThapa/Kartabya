@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -26,6 +26,8 @@ import {
 } from "lucide-react";
 import EBookContainer from "@/components/ebook/EBookContainer";
 import LessonTutor from "@/components/lesson-workspace/LessonTutor";
+import { CanvasWorkspace } from "@/components/lesson-workspace/CanvasWorkspace";
+import WorkspaceToggle, { type WorkspaceMode } from "@/components/lesson-workspace/WorkspaceToggle";
 import type { Lesson, Unit } from "@/types/lessons-types";
 import { ApiError, api } from "@/lib/api";
 import {
@@ -1121,7 +1123,33 @@ export default function LessonWorkspace({
   const [selectionPoint, setSelectionPoint] = useState({ x: 0, y: 0 });
   const [workspaceLayout, setWorkspaceLayout] = useState(getStoredWorkspaceLayout);
   const [isResizing, setIsResizing] = useState(false);
+  const workspaceStorageKey = `adaptiv:workspace-mode:${lesson.id}`;
+  const [workspaceMode, setWorkspaceMode] = useState<WorkspaceMode>(() => {
+    if (typeof window === "undefined") return "study";
+    const stored = window.localStorage.getItem(workspaceStorageKey);
+    return stored === "canvas" ? "canvas" : "study";
+  });
   const unitIndex = unit.lessons.findIndex((item) => item.id === lesson.id);
+
+  const toggleWorkspace = useCallback(
+    () => setWorkspaceMode((mode) => (mode === "study" ? "canvas" : "study")),
+    [],
+  );
+
+  useEffect(() => {
+    window.localStorage.setItem(workspaceStorageKey, workspaceMode);
+  }, [workspaceMode, workspaceStorageKey]);
+
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        toggleWorkspace();
+      }
+    };
+    document.addEventListener("keydown", handleShortcut);
+    return () => document.removeEventListener("keydown", handleShortcut);
+  }, [toggleWorkspace]);
 
   useEffect(() => {
     const saveTimer = window.setTimeout(() => {
@@ -1249,6 +1277,7 @@ export default function LessonWorkspace({
           </p>
         </div>
         <StudyTrackerControls lessonId={lesson.id} subject={unit.courseTitle} title={lesson.title} />
+        <WorkspaceToggle mode={workspaceMode} onToggle={toggleWorkspace} />
         {completed && (
           <Link
             href={`/games/teach/play?lesson_id=${encodeURIComponent(contentContext?.lesson.id ?? lesson.id)}&topic_title=${encodeURIComponent(lesson.title)}&subject=${encodeURIComponent(unit.courseTitle)}`}
@@ -1265,6 +1294,9 @@ export default function LessonWorkspace({
           {completed ? <Check size={15} /> : null}
           {completed ? "Completed" : "Mark complete"}
         </button>
+        <div aria-live="polite" className="sr-only">
+          {workspaceMode === "canvas" ? "Canvas workspace active." : "Study tools active."}
+        </div>
       </header>
       <div
       className={`relative min-h-0 flex-1 overflow-hidden transition-all duration-300 ${isLessonFullScreen ? "p-0" : "grid grid-cols-1 grid-rows-[minmax(0,1fr)_minmax(0,1fr)] items-stretch gap-3 p-3 sm:gap-4 sm:p-4 lg:grid-rows-1 lg:grid-cols-[var(--lesson-width)_var(--side-width)] lg:p-4"}`}
@@ -1348,33 +1380,57 @@ export default function LessonWorkspace({
         {!isLessonFullScreen && (
           <div
             data-resize-column
-            className="grid h-full min-h-0 overflow-hidden grid-rows-2 gap-3 sm:gap-4 lg:grid-rows-[var(--notes-height)_var(--chat-height)]"
+            className="relative h-full min-h-0 overflow-hidden"
           >
-            <div className="relative h-full min-h-0 overflow-hidden">
-              <NotesBoard
-                lesson={lesson}
-                contentContext={contentContext}
-                selectedText={noteSelection}
-                openComposer={noteComposerOpen}
-                onSelectedTextConsumed={() => setNoteSelection(null)}
-                onComposerClose={() => setNoteComposerOpen(false)}
-              />
-              <VerticalResizeHandle
-                height={notesPanelHeight}
-                onHeightChange={(height) =>
-                  setWorkspaceLayout((current) => ({ ...current, notesHeightPct: height }))
-                }
-                onResizingChange={setIsResizing}
-              />
-            </div>
-            <div className="h-full min-h-0 overflow-hidden">
-              <LessonTutor
-                lessonId={contentContext?.lesson.id ?? lesson.id}
-                lessonTitle={lesson.title}
-                selectedText={selectedText}
-                onClearSelectedText={() => setSelectedText(null)}
-              />
-            </div>
+            <AnimatePresence mode="wait" initial={false}>
+              {workspaceMode === "study" ? (
+                <motion.div
+                  key="study"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                  className="grid h-full min-h-0 overflow-hidden grid-rows-2 gap-3 sm:gap-4 lg:grid-rows-[var(--notes-height)_var(--chat-height)]"
+                >
+                  <div className="relative h-full min-h-0 overflow-hidden">
+                    <NotesBoard
+                      lesson={lesson}
+                      contentContext={contentContext}
+                      selectedText={noteSelection}
+                      openComposer={noteComposerOpen}
+                      onSelectedTextConsumed={() => setNoteSelection(null)}
+                      onComposerClose={() => setNoteComposerOpen(false)}
+                    />
+                    <VerticalResizeHandle
+                      height={notesPanelHeight}
+                      onHeightChange={(height) =>
+                        setWorkspaceLayout((current) => ({ ...current, notesHeightPct: height }))
+                      }
+                      onResizingChange={setIsResizing}
+                    />
+                  </div>
+                  <div className="h-full min-h-0 overflow-hidden">
+                    <LessonTutor
+                      lessonId={contentContext?.lesson.id ?? lesson.id}
+                      lessonTitle={lesson.title}
+                      selectedText={selectedText}
+                      onClearSelectedText={() => setSelectedText(null)}
+                    />
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="canvas"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                  className="h-full min-h-0"
+                >
+                  <CanvasWorkspace lessonId={contentContext?.lesson.id ?? lesson.id} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>

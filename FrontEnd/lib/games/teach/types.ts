@@ -38,7 +38,7 @@ export interface TeachGrade {
   correct_answer?: string;
 }
 
-export type TeachConnectionPhase = 'idle' | 'connecting' | 'explaining' | 'qna' | 'grading' | 'result' | 'failed';
+export type TeachConnectionPhase = 'idle' | 'connecting' | 'explaining' | 'awaiting_qna' | 'qna' | 'grading' | 'result' | 'failed';
 export type TeachPhase = TeachConnectionPhase | 'recording' | 'transcribing' | 'evaluating' | 'graded';
 
 export interface TeachFeedback {
@@ -60,4 +60,5 @@ export interface TeachMessage {
   id: string;
   sender: 'companion' | 'user';
   text: string;
+  streaming?: boolean;
 }

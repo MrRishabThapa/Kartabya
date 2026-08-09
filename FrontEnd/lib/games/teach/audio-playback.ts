@@ -14,6 +14,7 @@ export class TeachAudioPlayback {
   play(base64: string) {
     const context = this.context ?? new AudioContext({ sampleRate: 24000 });
     this.context = context;
+    void context.resume().catch(() => undefined);
     const samples = decodePcm16(base64);
     const buffer = context.createBuffer(1, samples.length, 24000);
     buffer.copyToChannel(samples, 0);

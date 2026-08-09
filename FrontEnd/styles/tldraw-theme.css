@@ -1,0 +1,8 @@
+/* Keep canvas selection and focus accents aligned with Adaptiv's warm theme. */
+.tl-container {
+  --color-selected: rgb(249 115 22);
+  --color-selected-contrast: white;
+  --color-focus: rgb(251 146 60);
+  --color-brush-fill: rgba(249, 115, 22, 0.15);
+  --color-brush-stroke: rgb(249 115 22);
+}
