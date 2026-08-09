@@ -1,10 +1,12 @@
 export type Vote = 'up' | 'down' | null;
 
 export interface CommunityAuthor {
+  id?: string;
   name: string;
   handle: string;
   initials: string;
   role?: 'Student' | 'Mentor';
+  avatar_url?: string | null;
 }
 
 export interface CommunityComment {
@@ -29,6 +31,7 @@ export interface CommunityPost {
   liked: boolean;
   imageUrl?: string;
   comments: CommunityComment[];
+  commentCount?: number;
 }
 
 export const scoreOf = (item: Pick<CommunityComment, 'upvotes' | 'downvotes'>) =>
