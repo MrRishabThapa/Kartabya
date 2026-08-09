@@ -9,10 +9,10 @@ import QuizResult from "./QuizResult";
 import ErrorState from "@/components/shared/ErrorState";
 import { BackendQuestion, QuizAttemptResult } from "@/types/backendQuiz";
 import QuizSkeletonContent from "./QuizSkeletonContent";
-import { awardXp } from "@/lib/xp";
 import { api, ApiError } from "@/lib/api";
 import { useUser } from "@/context/UserContext";
 import { CheckCircle2, CircleAlert, XCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface QuizContainerProps {
   subject?: string;
@@ -40,6 +40,16 @@ export default function QuizContainer({ subject = 'Computer Science', content = 
   const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [finished, setFinished] = useState(false);
+  const [attemptResult, setAttemptResult] = useState<QuizAttemptResult | null>(null);
+
+  const getErrorMessage = (err: unknown, fallback: string) => {
+    if (err instanceof ApiError) {
+      const detail = err.body?.detail;
+      if (typeof detail === "string") return detail;
+      if (detail && typeof detail.message === "string") return detail.message;
+    }
+    return err instanceof Error ? err.message : fallback;
+  };
 
   useEffect(() => {
     async function fetchQuiz() {
@@ -54,8 +64,9 @@ export default function QuizContainer({ subject = 'Computer Science', content = 
         setQuizId(data.id);
         setQuizData(data.questions);
       } catch (err: unknown) {
-        const apiError = err instanceof ApiError ? err.body?.detail : undefined;
-        setError(apiError || (err instanceof Error ? err.message : "Quiz generation failed."));
+        const message = getErrorMessage(err, "Quiz generation failed.");
+        setError(message);
+        toast.error(message);
       } finally {
         setLoading(false);
       }
@@ -93,10 +104,16 @@ export default function QuizContainer({ subject = 'Computer Science', content = 
           answers: nextAnswers,
         })) as QuizAttemptResult;
         setScore(result.score);
-        awardXp(result.score * 10);
+        setAttemptResult(result);
+        toast.success(
+          result.xp_penalty > 0
+            ? `+${result.xp_earned} XP · -${result.xp_penalty} XP penalty · ${result.total_xp} XP total`
+            : `+${result.xp_earned} XP · ${result.total_xp} XP total`,
+        );
       } catch (err: unknown) {
-        const apiError = err instanceof ApiError ? err.body?.detail : undefined;
-        setError(apiError || (err instanceof Error ? err.message : "Quiz submission failed."));
+        const message = getErrorMessage(err, "Quiz submission failed.");
+        setError(message);
+        toast.error(message);
         return;
       }
       setFinished(true);
@@ -109,6 +126,7 @@ export default function QuizContainer({ subject = 'Computer Science', content = 
     setAnswers([]);
     setHistory([]);
     setFinished(false);
+    setAttemptResult(null);
   };
 
   if (loading) {
@@ -143,6 +161,11 @@ export default function QuizContainer({ subject = 'Computer Science', content = 
                     <QuizResult
                       score={score}
                       total={quizData.length}
+                      passed={attemptResult?.passed ?? false}
+                      passMarkPercent={attemptResult?.pass_mark_percent ?? 50}
+                      xpEarned={attemptResult?.xp_earned ?? 0}
+                      xpPenalty={attemptResult?.xp_penalty ?? 0}
+                      totalXp={attemptResult?.total_xp ?? 0}
                       onRestart={handleRestart}
                     />
                   )}
@@ -190,6 +213,11 @@ export default function QuizContainer({ subject = 'Computer Science', content = 
             <QuizResult
               score={score}
               total={quizData.length}
+              passed={attemptResult?.passed ?? false}
+              passMarkPercent={attemptResult?.pass_mark_percent ?? 50}
+              xpEarned={attemptResult?.xp_earned ?? 0}
+              xpPenalty={attemptResult?.xp_penalty ?? 0}
+              totalXp={attemptResult?.total_xp ?? 0}
               onRestart={handleRestart}
             />
           )}
