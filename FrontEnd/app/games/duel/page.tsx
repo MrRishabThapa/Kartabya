@@ -13,6 +13,5 @@ export default async function DuelPage({
 }) {
   const params = await searchParams;
   const roomCode = Array.isArray(params.room) ? params.room[0] : params.room;
-
   return <DuelRoom initialRoomCode={roomCode} />;
 }
