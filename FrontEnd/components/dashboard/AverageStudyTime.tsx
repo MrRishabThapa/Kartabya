@@ -10,11 +10,12 @@ import {
   Cell,
   Tooltip,
 } from 'recharts';
-import { MOCK_STUDY_TIME } from '@/data/dashboard-mock';
+import { useStudyDashboard } from '@/hooks/useStudyDashboard';
+import type { StudyDay } from '@/lib/study/api';
 
 type Period = 'day' | 'week' | 'month';
 
-const CustomTooltip = ({ active, payload }: any) => {
+const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ value?: number }> }) => {
   if (!active || !payload?.length) return null;
   return (
     <div className="px-2.5 py-1 rounded-lg bg-slate-800 text-white text-xs font-bold shadow-lg">
@@ -25,17 +26,19 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 export default function AverageStudyTime() {
   const [period, setPeriod] = useState<Period>('week');
+  const { overview, history, loading, error, refresh } = useStudyDashboard();
   const periods: { value: Period; label: string }[] = [
     { value: 'day', label: 'Day' },
     { value: 'week', label: 'Week' },
     { value: 'month', label: 'Month' },
   ];
 
-  const todayMinutes = MOCK_STUDY_TIME.find((d:any) => d.isToday)?.minutes ?? 0;
-  const avgMinutes = Math.round(
-    MOCK_STUDY_TIME.filter((d:any) => d.minutes > 0).reduce((sum:any, d:any) => sum + d.minutes, 0) /
-    MOCK_STUDY_TIME.filter((d:any) => d.minutes > 0).length || 0
-  );
+  const todayMinutes = overview?.today.total_minutes ?? 0;
+  const avgMinutes = overview?.this_week.total_hours ? Math.round((overview.this_week.total_hours * 60) / 7) : 0;
+  const chartData = history.map((day: StudyDay) => ({
+    day: day.date.slice(5),
+    minutes: day.total_minutes,
+  })).slice(period === 'day' ? -1 : period === 'week' ? -7 : -30);
 
   return (
     <motion.div
@@ -72,18 +75,18 @@ export default function AverageStudyTime() {
       {/* Summary numbers */}
       <div className="flex items-baseline gap-2 mb-4">
         <span className="text-3xl font-extrabold text-slate-800 tabular-nums">
-          {todayMinutes}
+          {loading ? '—' : todayMinutes}
         </span>
         <span className="text-sm text-slate-500 font-medium">min today</span>
         <span className="text-xs text-slate-400 ml-auto">
-          Avg {avgMinutes} min/day
+          Avg {loading ? '—' : avgMinutes} min/day
         </span>
       </div>
 
       {/* Chart */}
       <div className="h-52 -ml-2">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={MOCK_STUDY_TIME} barCategoryGap="30%">
+          <BarChart data={chartData} barCategoryGap="30%">
             <XAxis
               dataKey="day"
               axisLine={false}
@@ -102,12 +105,16 @@ export default function AverageStudyTime() {
               radius={[8, 8, 8, 8]}
               animationDuration={600}
             >
-              {MOCK_STUDY_TIME.map((entry:any, i:any) => (
-                <Cell key={i} fill={entry.isToday ? '#F27928' : '#FBE0CC'} />
+              {chartData.map((entry, i) => (
+                <Cell key={entry.day} fill={i === chartData.length - 1 ? '#F27928' : '#FBE0CC'} />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
+      </div>
+      <div className="mt-3 flex items-center justify-between text-xs text-slate-400">
+        <span>{overview ? `${overview.this_week.total_hours.toFixed(1)}h this week · ${overview.this_month.total_hours.toFixed(1)}h this month` : error ?? 'Loading study data…'}</span>
+        {error && <button type="button" onClick={() => void refresh()} className="font-bold text-brand-primary hover:text-brand-primary-dark">Retry</button>}
       </div>
     </motion.div>
   );
