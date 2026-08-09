@@ -5,7 +5,6 @@ import { MOCK_USER } from "@/data/dashboard-mock";
 import ProfileCard from "@/components/dashboard/ProfileCard";
 import SuggestedActivities from "@/components/dashboard/SuggestedActivities";
 import AverageStudyTime from "@/components/dashboard/AverageStudyTime";
-import RecentHistory from "@/components/dashboard/RecentHistory";
 import SavedNotes from "@/components/dashboard/SavedNotes";
 
 export default function DashboardPage() {
@@ -28,7 +27,6 @@ export default function DashboardPage() {
       </div>
       <div className="space-y-4 md:space-y-6">
         <AverageStudyTime />
-        <RecentHistory />
         <SavedNotes />
       </div>
     </div>
