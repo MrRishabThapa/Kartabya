@@ -8,20 +8,18 @@ import Button from "@/components/shared/Button";
 import { login } from "@/lib/auth-service";
 import { ApiError } from "@/lib/api";
 import { completeOnboardingDraft } from "@/lib/onboarding-draft";
+import { toast } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
       const response = await login(email.trim(), password);
@@ -35,13 +33,14 @@ export default function LoginPage() {
     } catch (err) {
       if (err instanceof ApiError) {
         if (err.status === 401) {
-          setError("Incorrect email or password.");
+          toast.error("Incorrect email or password.");
         } else {
           const detail = err.body?.detail;
-          setError(typeof detail === "string" ? detail : "Could not save your onboarding details.");
+          const message = typeof detail === "string" ? detail : detail?.message ?? "Could not complete login.";
+          toast.error(message);
         }
       } else {
-        setError("Could not reach the local server. Make sure the backend is running.");
+        toast.error("Could not reach the local server. Make sure the backend is running.");
       }
     } finally {
       setLoading(false);
@@ -64,10 +63,6 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
-          {error && (
-            <div className="text-sm text-red-500 text-center">{error}</div>
-          )}
-
           <div className="space-y-2">
             <label className="text-sm text-slate-500">Email</label>
             <input
