@@ -17,6 +17,7 @@ export interface BackendQuiz {
   id: string;
   type: string;
   number_of_qns: number;
+  base_pass_marks?: number;
   questions: Question[];
 }
 
@@ -24,6 +25,11 @@ export interface QuizAttempt {
   attempt_id: string;
   score: number;
   total: number;
+  passed: boolean;
+  pass_mark_percent: number;
+  xp_earned: number;
+  xp_penalty: number;
+  total_xp: number;
 }
 
 export async function generateQuiz(params: {
