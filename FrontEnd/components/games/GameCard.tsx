@@ -3,21 +3,25 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { createDuelRoom, duelErrorCode, getDuelRoom, joinDuelRoom } from '@/lib/duel/api';
 import { Game } from '@/data/games-types';
 import ComingSoonModal from './ComingSoonModal';
 import DuelLobby from './DuelLobby';
 import QuizPanel from './QuizPanel';
+import TeachPanel from './teach/TeachIntroPanel';
 
 interface Props {
   game: Game;
   index: number;
+  initialOpenDuel?: boolean;
 }
 
-export default function GameCard({ game, index }: Props) {
+export default function GameCard({ game, index, initialOpenDuel = false }: Props) {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
-  const [showDuelLobby, setShowDuelLobby] = useState(false);
+  const [showDuelLobby, setShowDuelLobby] = useState(initialOpenDuel);
   const [showQuizPanel, setShowQuizPanel] = useState(false);
+  const [showTeachPanel, setShowTeachPanel] = useState(false);
   const isAvailable = game.status === 'available';
 
   const handleClick = () => {
@@ -27,6 +31,10 @@ export default function GameCard({ game, index }: Props) {
     }
     if (game.id === 'daily-quiz') {
       setShowQuizPanel(true);
+      return;
+    }
+    if (game.id === 'concept-coach') {
+      setShowTeachPanel(true);
       return;
     }
     if (isAvailable && game.route) {
@@ -83,6 +91,21 @@ export default function GameCard({ game, index }: Props) {
             <DuelLobby
               onClose={() => setShowDuelLobby(false)}
               onStartDuel={(roomCode) => router.push(`/games/duel?room=${encodeURIComponent(roomCode)}`)}
+              onCreateRoom={async (language) => {
+                const response = await createDuelRoom(language);
+                if (!response.room?.code) throw new Error('The duel service returned no room code.');
+                return response.room.code;
+              }}
+              onJoinRoom={async (roomCode) => {
+                try {
+                  const response = await joinDuelRoom(roomCode);
+                  return response.room?.code ?? roomCode;
+                } catch (joinError) {
+                  if (duelErrorCode(joinError) !== 'ALREADY_IN_ROOM') throw joinError;
+                  const existingRoom = await getDuelRoom(roomCode);
+                  return existingRoom.code;
+                }
+              }}
             />
           )}
         </AnimatePresence>
@@ -90,6 +113,11 @@ export default function GameCard({ game, index }: Props) {
       {game.id === 'daily-quiz' && (
         <AnimatePresence>
           {showQuizPanel && <QuizPanel onClose={() => setShowQuizPanel(false)} />}
+        </AnimatePresence>
+      )}
+      {game.id === 'concept-coach' && (
+        <AnimatePresence>
+          {showTeachPanel && <TeachPanel onClose={() => setShowTeachPanel(false)} />}
         </AnimatePresence>
       )}
     </>
