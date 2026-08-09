@@ -8,7 +8,14 @@ export const metadata: Metadata = {
   description: 'Learn while you play with quizzes, AI tutors, and multiplayer battles.',
 };
 
-export default function GamesPage() {
+export default async function GamesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ duel?: string }>;
+}) {
+  const params = await searchParams;
+  const openDuel = params.duel === 'open';
+
   return (
     <div className="space-y-6 md:space-y-8">
       <GamesHeader totalGames={GAMES.length} />
@@ -23,7 +30,7 @@ export default function GamesPage() {
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
           {GAMES.map((game, i) => (
-            <GameCard key={game.id} game={game} index={i} />
+            <GameCard key={game.id} game={game} index={i} initialOpenDuel={openDuel && game.id === 'flashcard-duel'} />
           ))}
         </div>
       </section>
