@@ -1,14 +1,20 @@
-'use client';
-import { motion } from 'framer-motion';
-import { PlayCircle, FileText, HelpCircle, BookOpen, Clock } from 'lucide-react';
-import { MOCK_HISTORY } from '@/data/dashboard-mock';
-import { HistoryItem } from '@/data/dashboard-types';
+"use client";
+import { motion } from "framer-motion";
+import {
+  PlayCircle,
+  FileText,
+  HelpCircle,
+  BookOpen,
+  Clock,
+} from "lucide-react";
+import { MOCK_HISTORY } from "@/data/dashboard-mock";
+import { HistoryItem } from "@/data/dashboard-types";
 
 const TYPE_META = {
-  video: { icon: PlayCircle, label: 'Video' },
-  notes: { icon: FileText, label: 'Notes' },
-  quiz: { icon: HelpCircle, label: 'Quiz' },
-  lesson: { icon: BookOpen, label: 'Lesson' },
+  video: { icon: PlayCircle, label: "Video" },
+  notes: { icon: FileText, label: "Notes" },
+  quiz: { icon: HelpCircle, label: "Quiz" },
+  lesson: { icon: BookOpen, label: "Lesson" },
 };
 
 export default function RecentHistory() {
@@ -29,7 +35,7 @@ export default function RecentHistory() {
       </div>
 
       <div className="space-y-1">
-        {MOCK_HISTORY.map((item:any, i:any) => (
+        {MOCK_HISTORY.map((item: any, i: any) => (
           <HistoryRow key={item.id} item={item} index={i} />
         ))}
       </div>
