@@ -5,7 +5,14 @@ import { api, ApiError } from "@/lib/api";
 import BookViewer from "./BookViewer";
 import BookSkeleton from "./BookSkeletonLoader";
 import ErrorState from "@/components/shared/ErrorState";
-import { getPersonalizedLesson, personalizeLesson, resolveContentContext, savePersonalizedProgress, type ContentLesson, type LessonVisual } from '@/lib/content-api';
+import {
+  getPersonalizedLesson,
+  personalizeLesson,
+  resolveContentContext,
+  savePersonalizedProgress,
+  type ContentLesson,
+  type LessonVisual,
+} from "@/lib/content-api";
 
 interface Props {
   topic?: string;
@@ -17,31 +24,57 @@ interface Props {
 
 interface ViewerBook {
   title: string;
-  pages: Array<{ type: 'text' | 'markdown' | 'image'; content?: string; image_url?: string; caption?: string; visuals?: LessonVisual[] }>;
+  pages: Array<{
+    type: "text" | "markdown" | "image";
+    content?: string;
+    image_url?: string;
+    caption?: string;
+    visuals?: LessonVisual[];
+  }>;
   personalizedLessonId?: string;
   resumePosition?: number;
 }
 
-function markdownPages(markdown: string, visuals: LessonVisual[] = []): Array<{ type: 'markdown'; content: string; visuals?: LessonVisual[] }> {
-  if (visuals.length || markdown.includes('[visual]')) return [{ type: 'markdown', content: markdown, visuals }];
+function markdownPages(
+  markdown: string,
+  visuals: LessonVisual[] = [],
+): Array<{ type: "markdown"; content: string; visuals?: LessonVisual[] }> {
+  if (visuals.length || markdown.includes("[visual]"))
+    return [{ type: "markdown", content: markdown, visuals }];
   const chunks = markdown.split(/\n(?=# )/g).filter(Boolean);
-  return (chunks.length ? chunks : [markdown]).map((content) => ({ type: 'markdown', content }));
+  return (chunks.length ? chunks : [markdown]).map((content) => ({
+    type: "markdown",
+    content,
+  }));
 }
 
 function isUuid(value: string) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
 }
 
 function getContentError(error: unknown) {
   if (error instanceof ApiError) {
-    if (error.status === 401) return 'Please sign in again to load your personalized lesson.';
-    if (error.status === 404) return 'This lesson or personalized content could not be found.';
-    if (error.status === 502) return 'Personalized lesson generation is temporarily unavailable. Please try again.';
+    if (error.status === 401)
+      return "Please sign in again to load your personalized lesson.";
+    if (error.status === 404)
+      return "This lesson or personalized content could not be found.";
+    if (error.status === 502)
+      return "Personalized lesson generation is temporarily unavailable. Please try again.";
   }
-  return error instanceof Error ? error.message : 'Could not load personalized lesson.';
+  return error instanceof Error
+    ? error.message
+    : "Could not load personalized lesson.";
 }
 
-export default function EBookContainer({ topic = "arrays", bookTitle, lessonId, contentLesson, embedded = false }: Props) {
+export default function EBookContainer({
+  topic = "arrays",
+  bookTitle,
+  lessonId,
+  contentLesson,
+  embedded = false,
+}: Props) {
   const [book, setBook] = useState<ViewerBook | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,26 +93,50 @@ export default function EBookContainer({ topic = "arrays", bookTitle, lessonId, 
         } else if (isUuid(lessonId)) {
           resolvedLessonId = lessonId;
         } else {
-          const context = await resolveContentContext(lessonId, topic, bookTitle);
-          if (!context) throw new Error('Lesson content could not be found.');
+          const context = await resolveContentContext(
+            lessonId,
+            topic,
+            bookTitle,
+          );
+          if (!context) throw new Error("Lesson content could not be found.");
           resolvedLessonId = context.lesson.id;
         }
         let personalizedLesson;
         try {
           personalizedLesson = await getPersonalizedLesson(resolvedLessonId);
         } catch (personalizedError) {
-          if (!(personalizedError instanceof ApiError) || personalizedError.status !== 404) throw personalizedError;
+          if (
+            !(personalizedError instanceof ApiError) ||
+            personalizedError.status !== 404
+          )
+            throw personalizedError;
           personalizedLesson = await personalizeLesson(resolvedLessonId);
         }
-        setBook({ title: personalizedLesson.lesson_title, pages: markdownPages(personalizedLesson.markdown, personalizedLesson.visuals ?? []), personalizedLessonId: personalizedLesson.id, resumePosition: personalizedLesson.resume_position });
+        setBook({
+          title: personalizedLesson.lesson_title,
+          pages: markdownPages(
+            personalizedLesson.markdown,
+            personalizedLesson.visuals ?? [],
+          ),
+          personalizedLessonId: personalizedLesson.id,
+          resumePosition: personalizedLesson.resume_position,
+        });
         return;
       } else {
-        response = await api.get(`/book?topic=${encodeURIComponent(topic)}`) as { data: ViewerBook };
+        response = (await api.get(
+          `/book?topic=${encodeURIComponent(topic)}`,
+        )) as { data: ViewerBook };
       }
 
       setBook((response as { data: ViewerBook }).data);
     } catch (err: unknown) {
-      setError(lessonId ? getContentError(err) : err instanceof Error ? err.message : "Book generation failed.");
+      setError(
+        lessonId
+          ? getContentError(err)
+          : err instanceof Error
+            ? err.message
+            : "Book generation failed.",
+      );
     } finally {
       setLoading(false);
     }
@@ -90,32 +147,54 @@ export default function EBookContainer({ topic = "arrays", bookTitle, lessonId, 
     return () => window.clearTimeout(requestId);
   }, [fetchBook]);
 
-  const saveProgress = useCallback((resumePosition: number, progressPercent: number) => {
-    if (!book?.personalizedLessonId) return;
-    if (progressTimer.current) window.clearTimeout(progressTimer.current);
-    progressTimer.current = window.setTimeout(() => {
-      void savePersonalizedProgress(book.personalizedLessonId as string, resumePosition, progressPercent).catch(() => undefined);
-    }, 500);
-  }, [book]);
+  const saveProgress = useCallback(
+    (resumePosition: number, progressPercent: number) => {
+      if (!book?.personalizedLessonId) return;
+      if (progressTimer.current) window.clearTimeout(progressTimer.current);
+      progressTimer.current = window.setTimeout(() => {
+        void savePersonalizedProgress(
+          book.personalizedLessonId as string,
+          resumePosition,
+          progressPercent,
+        ).catch(() => undefined);
+      }, 500);
+    },
+    [book],
+  );
 
-  useEffect(() => () => {
-    if (progressTimer.current) window.clearTimeout(progressTimer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (progressTimer.current) window.clearTimeout(progressTimer.current);
+    },
+    [],
+  );
 
   return (
-    <div className={embedded ? "h-full min-h-0 bg-slate-50" : "min-h-screen bg-slate-50"}>
+    <div
+      className={
+        embedded ? "h-full min-h-0 bg-slate-50" : "min-h-screen bg-slate-50"
+      }
+    >
       {/* Loading */}
       {loading && (
-        <div className={embedded ? "h-full p-4" : "max-w-6xl mx-auto px-4 py-10"}>
+        <div
+          className={embedded ? "h-full p-4" : "max-w-6xl mx-auto px-4 py-10"}
+        >
           <BookSkeleton />
         </div>
       )}
 
       {/* Error */}
       {!loading && error && (
-        <div className={embedded ? "h-full p-4" : "max-w-4xl mx-auto px-4 py-10"}>
+        <div
+          className={embedded ? "h-full p-4" : "max-w-4xl mx-auto px-4 py-10"}
+        >
           <ErrorState
-            title={lessonId ? 'Unable to load personalized lesson' : 'Unable to open book'}
+            title={
+              lessonId
+                ? "Unable to load personalized lesson"
+                : "Unable to open book"
+            }
             subtitle={error}
             onRetry={fetchBook}
           />
@@ -123,7 +202,14 @@ export default function EBookContainer({ topic = "arrays", bookTitle, lessonId, 
       )}
 
       {/* Book */}
-      {!loading && !error && book && <BookViewer book={book} embedded={embedded} initialResumePosition={book.resumePosition} onProgress={saveProgress} />}
+      {!loading && !error && book && (
+        <BookViewer
+          book={book}
+          embedded={embedded}
+          initialResumePosition={book.resumePosition}
+          onProgress={saveProgress}
+        />
+      )}
     </div>
   );
 }
