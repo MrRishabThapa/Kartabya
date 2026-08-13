@@ -11,7 +11,11 @@ export default function DashboardShell({ children }: { children: ReactNode }) {
   const { authUser, onboarding } = useUser();
   const user: UserProfile = {
     ...MOCK_USER,
-    name: onboarding?.userName || authUser?.name?.trim() || authUser?.email.split("@")[0] || MOCK_USER.name,
+    name:
+      onboarding?.userName ||
+      authUser?.name?.trim() ||
+      authUser?.email.split("@")[0] ||
+      MOCK_USER.name,
     class: onboarding
       ? `${onboarding.targetCourse.grade} · ${onboarding.targetCourse.subject}`
       : MOCK_USER.class,
