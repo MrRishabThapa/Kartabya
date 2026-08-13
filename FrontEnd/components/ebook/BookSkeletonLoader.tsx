@@ -3,7 +3,6 @@
 export default function BookSkeleton() {
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-slate-50 px-4 py-4">
-
       {/* Title */}
       <div className="text-center shrink-0">
         <div className="h-10 w-96 max-w-[90%] mx-auto rounded shimmer" />
@@ -16,7 +15,6 @@ export default function BookSkeleton() {
 
       {/* Book Area */}
       <div className="flex-1 flex items-center p-5 justify-center overflow-hidden">
-
         <div
           className="
             relative
@@ -28,7 +26,6 @@ export default function BookSkeleton() {
            
           "
         >
-
           {/* Left Spine */}
           <div
             className="
@@ -64,13 +61,11 @@ export default function BookSkeleton() {
               relative
             "
           >
-
             {/* Adaptiv Header */}
             <div className="h-4 w-28 rounded shimmer mb-10 mt-5" />
 
             {/* Paragraphs */}
             <div className="space-y-5">
-
               <div className="h-7 w-full rounded shimmer" />
               <div className="h-7 w-11/12 rounded shimmer" />
               <div className="h-7 w-full rounded shimmer" />
@@ -79,17 +74,13 @@ export default function BookSkeleton() {
               <div className="h-7 w-9/12 rounded shimmer" />
               <div className="h-7 w-full rounded shimmer" />
               <div className="h-7 w-8/12 rounded shimmer" />
-
             </div>
-
-            
           </div>
         </div>
       </div>
 
       {/* Controls */}
       <div className="flex justify-between gap-4 mt-4 shrink-0">
-
         <div
           className="
             h-14
@@ -107,7 +98,6 @@ export default function BookSkeleton() {
             shimmer
           "
         />
-
       </div>
     </div>
   );
