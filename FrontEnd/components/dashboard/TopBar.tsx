@@ -1,11 +1,11 @@
-'use client';
-import { ChevronDown, LogOut, Search } from 'lucide-react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
-import { logout } from '@/lib/auth-service';
-import { useUser } from '@/context/UserContext';
-import { UserProfile } from '@/data/dashboard-types';
+"use client";
+import { ChevronDown, LogOut, Search } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { logout } from "@/lib/auth-service";
+import { useUser } from "@/context/UserContext";
+import { UserProfile } from "@/data/dashboard-types";
 
 interface Props {
   user: UserProfile;
@@ -19,10 +19,11 @@ export default function TopBar({ user }: Props) {
 
   useEffect(() => {
     function closeProfile(event: MouseEvent) {
-      if (!profileRef.current?.contains(event.target as Node)) setProfileOpen(false);
+      if (!profileRef.current?.contains(event.target as Node))
+        setProfileOpen(false);
     }
-    document.addEventListener('mousedown', closeProfile);
-    return () => document.removeEventListener('mousedown', closeProfile);
+    document.addEventListener("mousedown", closeProfile);
+    return () => document.removeEventListener("mousedown", closeProfile);
   }, []);
 
   async function handleLogout() {
@@ -30,7 +31,7 @@ export default function TopBar({ user }: Props) {
       await logout();
     } finally {
       setAuthUser(null);
-      router.replace('/auth/login');
+      router.replace("/auth/login");
     }
   }
 
@@ -67,18 +68,34 @@ export default function TopBar({ user }: Props) {
         >
           <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-slate-100">
             {user.avatarUrl ? (
-              <Image src={user.avatarUrl} alt={user.name} width={32} height={32} />
+              <Image
+                src={user.avatarUrl}
+                alt={user.name}
+                width={32}
+                height={32}
+              />
             ) : (
-              <span className="text-sm font-bold text-slate-500">{user.name.charAt(0)}</span>
+              <span className="text-sm font-bold text-slate-500">
+                {user.name.charAt(0)}
+              </span>
             )}
           </div>
-          <ChevronDown size={14} className={`text-slate-400 transition-transform ${profileOpen ? 'rotate-180' : ''}`} strokeWidth={2} />
+          <ChevronDown
+            size={14}
+            className={`text-slate-400 transition-transform ${profileOpen ? "rotate-180" : ""}`}
+            strokeWidth={2}
+          />
         </button>
 
         {profileOpen && (
-          <div role="menu" className="absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+          <div
+            role="menu"
+            className="absolute right-0 top-[calc(100%+0.5rem)] z-20 min-w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
+          >
             <div className="border-b border-slate-100 px-3 py-2">
-              <p className="truncate text-sm font-bold text-slate-800">{user.name}</p>
+              <p className="truncate text-sm font-bold text-slate-800">
+                {user.name}
+              </p>
               <p className="text-xs text-slate-400">Account</p>
             </div>
             <button
