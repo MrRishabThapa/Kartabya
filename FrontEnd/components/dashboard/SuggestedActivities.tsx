@@ -1,18 +1,18 @@
-'use client';
-import { motion } from 'framer-motion';
-import { PlayCircle, Gamepad2, BookOpen } from 'lucide-react';
-import { MOCK_ACTIVITIES } from '@/data/dashboard-mock';
-import ActivityCard from './ActivityCard';
+"use client";
+import { motion } from "framer-motion";
+import { PlayCircle, Gamepad2, BookOpen } from "lucide-react";
+import { MOCK_ACTIVITIES } from "@/data/dashboard-mock";
+import ActivityCard from "./ActivityCard";
 
 const ACTIVITY_ICONS = {
-  'next-lesson': PlayCircle,
-  'minigames': Gamepad2,
-  'practice': BookOpen,
+  "next-lesson": PlayCircle,
+  minigames: Gamepad2,
+  practice: BookOpen,
 };
 
 export default function SuggestedActivities() {
-  const smallActivities = MOCK_ACTIVITIES.filter((a) => a.size === 'small');
-  const wideActivities = MOCK_ACTIVITIES.filter((a) => a.size === 'wide');
+  const smallActivities = MOCK_ACTIVITIES.filter((a) => a.size === "small");
+  const wideActivities = MOCK_ACTIVITIES.filter((a) => a.size === "wide");
 
   return (
     <div className="space-y-3">
