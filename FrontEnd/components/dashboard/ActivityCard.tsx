@@ -1,9 +1,9 @@
-'use client';
-import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { LucideIcon } from 'lucide-react';
-import { Activity } from '@/data/dashboard-types';
-import DuolingoButton from '@/components/shared/Button';
+"use client";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { LucideIcon } from "lucide-react";
+import { Activity } from "@/data/dashboard-types";
+import DuolingoButton from "@/components/shared/Button";
 
 interface Props {
   activity: Activity;
@@ -13,7 +13,7 @@ interface Props {
 
 export default function ActivityCard({ activity, index, Icon }: Props) {
   const router = useRouter();
-  const isWide = activity.size === 'wide';
+  const isWide = activity.size === "wide";
 
   return (
     <motion.div
@@ -23,14 +23,20 @@ export default function ActivityCard({ activity, index, Icon }: Props) {
       className="bg-white rounded-2xl border border-slate-200 p-6
                  hover:border-slate-300 transition-colors"
     >
-      <div className={`flex ${isWide ? 'flex-row items-center gap-6' : 'flex-col'} h-full`}>
+      <div
+        className={`flex ${isWide ? "flex-row items-center gap-6" : "flex-col"} h-full`}
+      >
         {/* Icon badge */}
         <div
           className={`flex items-center justify-center w-12 h-12 rounded-xl flex-shrink-0
-                     ${isWide ? '' : 'mb-4'}`}
+                     ${isWide ? "" : "mb-4"}`}
           style={{ backgroundColor: `${activity.accentColor}15` }}
         >
-          <Icon size={22} style={{ color: activity.accentColor }} strokeWidth={2} />
+          <Icon
+            size={22}
+            style={{ color: activity.accentColor }}
+            strokeWidth={2}
+          />
         </div>
 
         {/* Text + CTA */}
@@ -38,9 +44,7 @@ export default function ActivityCard({ activity, index, Icon }: Props) {
           <h3 className="text-slate-800 font-extrabold text-lg tracking-tight">
             {activity.title}
           </h3>
-          <p className="mt-1 text-slate-500 text-sm">
-            {activity.subtitle}
-          </p>
+          <p className="mt-1 text-slate-500 text-sm">{activity.subtitle}</p>
 
           {/* Optional meta info (for next-lesson card) */}
           {activity.meta && (
@@ -56,7 +60,8 @@ export default function ActivityCard({ activity, index, Icon }: Props) {
                     color: activity.accentColor,
                   }}
                 >
-                  Lesson {activity.meta.lessonNumber}/{activity.meta.totalLessons}
+                  Lesson {activity.meta.lessonNumber}/
+                  {activity.meta.totalLessons}
                 </span>
               )}
             </div>
