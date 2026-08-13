@@ -1,8 +1,8 @@
-'use client';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
+"use client";
+import { motion } from "framer-motion";
+import Image from "next/image";
 // import { Flame, Zap } from 'lucide-react';
-import { UserProfile } from '@/data/dashboard-types';
+import { UserProfile } from "@/data/dashboard-types";
 
 interface Props {
   user: UserProfile;
@@ -11,9 +11,7 @@ interface Props {
 export default function ProfileCard({ user }: Props) {
   const hour = new Date().getHours();
   const greeting =
-    hour < 12 ? 'Good morning' :
-    hour < 17 ? 'Good afternoon' :
-    'Good evening';
+    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   return (
     <motion.div
@@ -28,8 +26,10 @@ export default function ProfileCard({ user }: Props) {
         Absolutely positioned, bottom-aligned, so the "cut" of the image
         sits flush with the card's bottom edge creating the "peeking out" effect.
       */}
-      <div className="absolute bottom-0 left-2 sm:left-4 w-42 h-50 sm:w-36 sm:h-48
-                      pointer-events-none">
+      <div
+        className="absolute bottom-0 left-2 sm:left-4 w-42 h-50 sm:w-36 sm:h-48
+                      pointer-events-none"
+      >
         <Image
           src="/assets/fox-mascot.png"
           alt="Fox mascot"
@@ -38,7 +38,7 @@ export default function ProfileCard({ user }: Props) {
           className="object-contain  object-bottom"
         />
       </div>
-    
+
       <div className="relative z-10 pl-38 sm:pl-48">
         <p className="text-slate-500 text-xs">{greeting},</p>
         <h2 className="text-slate-800 text-xl sm:text-2xl font-extrabold tracking-tight mt-1">
@@ -52,7 +52,6 @@ export default function ProfileCard({ user }: Props) {
         )}
       </div>
 
-      
       {/* Stats row
       <div className="mt-5 pt-5 border-t border-slate-100 flex items-center justify-around">
         <div className="flex items-center gap-2">
