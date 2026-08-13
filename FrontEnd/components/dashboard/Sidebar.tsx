@@ -1,21 +1,21 @@
-'use client';
-import Link from 'next/link';
-import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   BookOpen,
-  Trophy,        // ← was ClipboardCheck
+  Trophy, // ← was ClipboardCheck
   MessageCircle,
   Gamepad2,
-} from 'lucide-react';
+} from "lucide-react";
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Overview',    href: '/dashboard' },
-  { icon: BookOpen,        label: 'Classes',     href: '/dashboard/classes' },
-  { icon: Trophy,          label: 'Leaderboard', href: '/dashboard/leaderboard' },
-  { icon: MessageCircle,   label: 'Community',       href: '/dashboard/community' },
-  { icon: Gamepad2,        label: 'Games',       href: '/dashboard/games' },
+  { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
+  { icon: BookOpen, label: "Classes", href: "/dashboard/classes" },
+  { icon: Trophy, label: "Leaderboard", href: "/dashboard/leaderboard" },
+  { icon: MessageCircle, label: "Community", href: "/dashboard/community" },
+  { icon: Gamepad2, label: "Games", href: "/dashboard/games" },
 ];
 
 export default function Sidebar() {
@@ -40,8 +40,8 @@ export default function Sidebar() {
       <nav className="flex flex-col gap-1 w-full px-3">
         {NAV_ITEMS.map((item) => {
           const isActive =
-            item.href === '/dashboard'
-              ? pathname === '/dashboard'
+            item.href === "/dashboard"
+              ? pathname === "/dashboard"
               : pathname.startsWith(item.href);
           const Icon = item.icon;
           return (
@@ -51,9 +51,10 @@ export default function Sidebar() {
               className={`
                 flex flex-col items-center gap-1 py-3 px-2 rounded-xl
                 transition-colors
-                ${isActive
-                  ? 'bg-brand-primary-bg text-brand-primary'
-                  : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50'
+                ${
+                  isActive
+                    ? "bg-brand-primary-bg text-brand-primary"
+                    : "text-slate-400 hover:text-slate-700 hover:bg-slate-50"
                 }
               `}
             >
