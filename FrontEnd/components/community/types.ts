@@ -1,11 +1,11 @@
-export type Vote = 'up' | 'down' | null;
+export type Vote = "up" | "down" | null;
 
 export interface CommunityAuthor {
   id?: string;
   name: string;
   handle: string;
   initials: string;
-  role?: 'Student' | 'Mentor';
+  role?: "Student" | "Mentor";
   avatar_url?: string | null;
 }
 
@@ -34,5 +34,6 @@ export interface CommunityPost {
   commentCount?: number;
 }
 
-export const scoreOf = (item: Pick<CommunityComment, 'upvotes' | 'downvotes'>) =>
-  item.upvotes - item.downvotes;
+export const scoreOf = (
+  item: Pick<CommunityComment, "upvotes" | "downvotes">,
+) => item.upvotes - item.downvotes;
