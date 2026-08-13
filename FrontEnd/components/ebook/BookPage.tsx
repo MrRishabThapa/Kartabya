@@ -1,10 +1,10 @@
 "use client";
-import LessonVisualRenderer from '@/components/lesson/lesson-visual-renderer';
-import type { LessonVisual } from '@/lib/content-api';
+import LessonVisualRenderer from "@/components/lesson/lesson-visual-renderer";
+import type { LessonVisual } from "@/lib/content-api";
 
 interface Props {
   page: {
-    type: 'text' | 'markdown' | 'image';
+    type: "text" | "markdown" | "image";
     content?: string;
     image_url?: string;
     caption?: string;
@@ -14,11 +14,7 @@ interface Props {
   onNext?: () => void;
 }
 
-export default function BookPage({
-  page,
-  pageNumber,
-  onNext,
-}: Props) {
+export default function BookPage({ page, pageNumber, onNext }: Props) {
   return (
     <div
       className="
@@ -43,19 +39,23 @@ export default function BookPage({
 
       {/* Content */}
       <div className="mx-auto w-full max-w-[78ch] select-text cursor-text">
-
         {page.type === "text" && (
           <p className="text-lg leading-9 text-slate-700">
-            {page.content ?? ''}
+            {page.content ?? ""}
           </p>
         )}
 
-        {page.type === "markdown" && <LessonVisualRenderer markdown={page.content ?? ''} visuals={page.visuals ?? []} />}
+        {page.type === "markdown" && (
+          <LessonVisualRenderer
+            markdown={page.content ?? ""}
+            visuals={page.visuals ?? []}
+          />
+        )}
 
         {page.type === "image" && (
           <div className="space-y-6">
             <img
-              src={page.image_url ?? ''}
+              src={page.image_url ?? ""}
               alt=""
               className="
                 w-full
@@ -66,7 +66,7 @@ export default function BookPage({
             />
 
             <p className="text-sm text-slate-500 italic">
-              {page.caption ?? ''}
+              {page.caption ?? ""}
             </p>
           </div>
         )}
