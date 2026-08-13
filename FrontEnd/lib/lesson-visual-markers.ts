@@ -5,7 +5,9 @@ export type LessonMarkdownSegment =
   | { type: "visual" };
 
 /** Splits only markers outside fenced code blocks; markers in code remain code. */
-export function splitLessonVisualMarkers(markdown: string): LessonMarkdownSegment[] {
+export function splitLessonVisualMarkers(
+  markdown: string,
+): LessonMarkdownSegment[] {
   const segments: LessonMarkdownSegment[] = [];
   let inFence = false;
   const pushMarkdown = (content: string) => {
@@ -64,8 +66,13 @@ function paragraphUnits(content: string) {
 }
 
 /** Matches markers first, then distributes unmatched visuals at paragraph boundaries. */
-export function buildInlineLessonSegments(markdown: string, visuals: LessonVisual[]): InlineLessonSegment[] {
-  const orderedVisuals = [...visuals].sort((left, right) => left.position - right.position);
+export function buildInlineLessonSegments(
+  markdown: string,
+  visuals: LessonVisual[],
+): InlineLessonSegment[] {
+  const orderedVisuals = [...visuals].sort(
+    (left, right) => left.position - right.position,
+  );
   const markerSegments = splitLessonVisualMarkers(markdown);
   if (!orderedVisuals.length) return markerSegments;
 
@@ -73,33 +80,48 @@ export function buildInlineLessonSegments(markdown: string, visuals: LessonVisua
   let matchedIndex = 0;
   for (const segment of markerSegments) {
     if (segment.type === "visual") {
-      baseSegments.push({ type: "visual", visual: orderedVisuals[matchedIndex] });
+      baseSegments.push({
+        type: "visual",
+        visual: orderedVisuals[matchedIndex],
+      });
       matchedIndex += 1;
     } else {
-      for (const unit of paragraphUnits(segment.content)) baseSegments.push({ type: "markdown", content: unit });
+      for (const unit of paragraphUnits(segment.content))
+        baseSegments.push({ type: "markdown", content: unit });
     }
   }
 
   const extras = orderedVisuals.slice(matchedIndex);
   if (!extras.length) return baseSegments;
 
-  const markdownLength = baseSegments.reduce((total, segment) => total + (segment.type === "markdown" ? segment.content.length : 0), 0);
-  const markdownUnits = baseSegments.filter((segment) => segment.type === "markdown");
+  const markdownLength = baseSegments.reduce(
+    (total, segment) =>
+      total + (segment.type === "markdown" ? segment.content.length : 0),
+    0,
+  );
+  const markdownUnits = baseSegments.filter(
+    (segment) => segment.type === "markdown",
+  );
   if (!markdownUnits.length) return baseSegments;
 
   const result: InlineLessonSegment[] = [];
   let markdownCursor = 0;
   let extraIndex = 0;
-  const maxPosition = Math.max(1, ...orderedVisuals.map((visual) => visual.position));
+  const maxPosition = Math.max(
+    1,
+    ...orderedVisuals.map((visual) => visual.position),
+  );
 
   for (const segment of baseSegments) {
     if (segment.type === "visual") {
       result.push(segment);
       continue;
     }
-    const targetBefore = (extraIndex < extras.length && markdownLength > 0)
-      ? ((extras[extraIndex].position - 1) / Math.max(1, maxPosition - 1)) * markdownLength
-      : Number.POSITIVE_INFINITY;
+    const targetBefore =
+      extraIndex < extras.length && markdownLength > 0
+        ? ((extras[extraIndex].position - 1) / Math.max(1, maxPosition - 1)) *
+          markdownLength
+        : Number.POSITIVE_INFINITY;
     if (markdownCursor >= targetBefore) {
       result.push({ type: "visual", visual: extras[extraIndex] });
       extraIndex += 1;
